@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 
-import { NamespaceModel, ServiceModel, ServiceMonitorModel } from '../../models';
+import { NamespaceModel, ServiceModel, ServiceMonitorModel, PodModel, PodMonitorModel } from '../../models';
 import { K8sResourceKind, LabelSelector, referenceForModel } from '../../module/k8s';
 import { RootState } from '../../redux';
 import { RowFunctionArgs, Table, TableData } from '../factory';
@@ -31,13 +31,73 @@ import { Labels } from './labels';
 import { AlertSource, PrometheusAPIError, Target } from './types';
 import { targetSource } from './utils';
 
+// Context Creation 
 const MonitorsWatchContext = React.createContext([]);
 const ServicesWatchContext = React.createContext([]);
 
+const PodMonitorsWatchContext = React.createContext([]);
+const PodsWatchContext = React.createContext([]);
+
+// Q: are targets the endpoints we're trying to scrape? 
+/**
+ * PodMontior 
+ * Finds target > Pod > PodMonitor 
+ * param -- 
+ */
+const PodMonitor: React.FC<{target: Target}> = ({ target }) => {
+  const [podmonitors, podmonitorsLoaded] = React.useContext(PodMonitorsWatchContext); 
+  const [pods, podsLoaded] = React.useContext(PodsWatchContext);
+
+  // Q: What error is this checking for?
+  if (!podsLoaded || !podmonitorsLoaded) {
+    return <LoadingInline />;
+  }
+
+  // Find the pods that corresponds to the target 
+  const pod = _.find(
+    pods, 
+    ({ metadata }) => 
+      metadata.name === target?.labels?.pod && metadata.namespace === target?.labels?.namespace,
+  );
+
+  // Find the podmonitors that correspond to the pods 
+  // lodash _.find(collection, predicate, fromIndex )
+  const podmonitor = _.find(
+    podmonitors, 
+    ({metadata, spec}) => pod && target.scrapePool.includes(`/${metadata.namespace}/${metadata.name}/`) && 
+    ((spec.selector.matchLabels === undefined && spec.selector.matchExpressions === undefined) ||
+        new LabelSelector(spec.selector).matchesLabels(pod.metadata.labels ?? {})) &&
+      (spec.namespaceSelector?.matchNames === undefined ||
+        _.includes(spec.namespaceSelector?.matchNames, pod.metadata.namespace)),
+  );
+
+  // If there are no pod monitors don't return anything, 
+  // else return the ResourceLink 
+  // Q: Is this so the Metrics Target Page to the PodMonitor's Page?
+  if (!podmonitor){
+    return <>-<>;</></>
+  }
+
+  return (
+    <ResourceLink
+      kind={referenceForModel(PodMonitorModel)}
+      name={pod.metadata.name}
+      namespace={pod.metadata.namespace}
+    />
+  );
+}
+
+/*
+ * Service Monitor 
+ * Finds target > service > servicemonitor 
+ * @param param0 
+ * @returns 
+ */
 const ServiceMonitor: React.FC<{ target: Target }> = ({ target }) => {
   const [monitors, monitorsLoaded] = React.useContext(MonitorsWatchContext);
   const [services, servicesLoaded] = React.useContext(ServicesWatchContext);
 
+  // Q: What error is this checking for?
   if (!servicesLoaded || !monitorsLoaded) {
     return <LoadingInline />;
   }
@@ -72,9 +132,16 @@ const ServiceMonitor: React.FC<{ target: Target }> = ({ target }) => {
       namespace={monitor.metadata.namespace}
     />
   );
-};
+}; 
 
+
+/**
+ * Health -- of the component 
+ * params : api endpoint for health is scraped and is given as a string 'up' or 'down'
+ * return : an icon to be rendered, indicating if the API endpoint for health 
+ */
 const Health: React.FC<{ health: string }> = React.memo(({ health }) => {
+  // Q: why is the react hook useTranslation() used here? Multilingal Application?
   const { t } = useTranslation();
 
   return health === 'up' ? (
@@ -88,15 +155,27 @@ const Health: React.FC<{ health: string }> = React.memo(({ health }) => {
   );
 });
 
+/**
+ * Defines prop types for what should be used for 
+ * NOTE: follow this instead of inline when you have lots of params, 
+ * This is a convention
+ */
 type DetailsProps = RouteComponentProps<{ scrapeUrl?: string }> & {
   loaded: boolean;
   loadError: string;
   targets: Target[];
 };
 
+/**
+ * Details -- return component for Target Details 
+ * Details include the Endpoint, Namespace, Labels, Last Scrapped, Scrap Duration
+ * withRouter -- send props to inner component 
+ */
 const Details = withRouter<DetailsProps>(({ loaded, loadError, match, targets }) => {
   const { t } = useTranslation();
 
+  // atob decodes a string of data which has been encoded using Base64
+  // '??' is a Nullish Coalescing -- couldBeThisOrThatThing = thisThing ?? orThatThing
   const scrapeUrl = atob(match?.params?.scrapeUrl ?? '');
   const target: Target = scrapeUrl ? _.find(targets, { scrapeUrl }) : undefined;
 
@@ -153,9 +232,14 @@ const Details = withRouter<DetailsProps>(({ loaded, loadError, match, targets })
                     <Health health={target?.health} />
                   </dd>
                   <dt>{t('public~Monitor')}</dt>
+                  {/* NOTE: !conditionally render */}
                   <dd>
                     <ServiceMonitor target={target} />
                   </dd>
+                  <dd>
+                    <PodMonitor target={target} />
+                  </dd>
+
                 </dl>
               </div>
             </div>
@@ -166,6 +250,9 @@ const Details = withRouter<DetailsProps>(({ loaded, loadError, match, targets })
   );
 });
 
+/**
+ * tableClasses -- an array to centralize classNames for styling Target Details 
+ */
 const tableClasses = [
   'pf-u-w-25-on-md', // Endpoint
   'pf-u-w-16-on-md', // Monitor
@@ -173,10 +260,13 @@ const tableClasses = [
   'pf-u-w-16-on-md', // Namespace
   'pf-m-hidden pf-m-visible-on-md', // Last Scrape
   'pf-m-hidden pf-m-visible-on-md', // Scrape Duration
+  
 ];
 
 const Row: React.FC<RowFunctionArgs<Target>> = ({ obj }) => {
   const { health, labels, lastScrape, lastScrapeDuration, scrapeUrl } = obj;
+
+  //  NOTE: need to check if this is a podmonitor OR a servicemonitor before rendering 
 
   return (
     <>
@@ -327,6 +417,7 @@ const List: React.FC<ListProps> = ({ loaded, loadError, targets }) => {
   );
 };
 
+// Q: Is the POLL_INTERVAL the time between scrapes? 15ms * 1000 == every 15 seconds we scrape the endpoints?
 const POLL_INTERVAL = 15 * 1000;
 
 export const TargetsUI: React.FC<{}> = () => {
