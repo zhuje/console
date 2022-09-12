@@ -437,6 +437,10 @@ $monitoring-line-height: 18px;
   }
 }
 
+.query-browser__series-select-all-btn {
+  padding-top: 15px !important;
+}
+
 .query-browser__series-btn {
   border: var(--pf-global--BorderWidth--sm) solid transparent;
   border-radius: var(--pf-global--BorderRadius--sm);

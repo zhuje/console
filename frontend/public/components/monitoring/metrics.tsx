@@ -310,6 +310,22 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
     observe.getIn(['queryBrowser', 'lastRequestTime']),
   );
 
+  const isDisabledSeriesEmpty = useSelector(({ observe }: RootState) =>
+    _.isEmpty(observe.getIn(['queryBrowser', 'queries', index, 'disabledSeries'])),
+  );
+
+  const dispatch = useDispatch();
+
+  const toggleAllSeries = React.useCallback(
+    () =>
+      dispatch(
+        queryBrowserPatchQuery(index, {
+          disabledSeries: isDisabledSeriesEmpty ? series : [],
+        }),
+      ),
+    [dispatch, index, isDisabledSeriesEmpty, series],
+  );
+
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
   const tick = () => {
@@ -444,6 +460,14 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
     <>
       <div className="query-browser__table-wrapper">
         <div className="horizontal-scroll">
+          <Button
+            variant="link"
+            isInline
+            onClick={toggleAllSeries}
+            className="query-browser__series-select-all-btn"
+          >
+            {isDisabledSeriesEmpty ? t('public~Unselect all') : t('public~Select all')}
+          </Button>
           <Table
             aria-label={t('public~query results table')}
             cells={columns}
