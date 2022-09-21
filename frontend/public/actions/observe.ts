@@ -26,6 +26,7 @@ export enum ActionType {
   QueryBrowserSetTimespan = 'queryBrowserSetTimespan',
   QueryBrowserToggleIsEnabled = 'queryBrowserToggleIsEnabled',
   QueryBrowserToggleSeries = 'queryBrowserToggleSeries',
+  QueryBrowserToggleAllSeries = 'queryBrowserToggleAllSeries',
   SetAlertCount = 'SetAlertCount',
   ToggleGraphs = 'toggleGraphs',
 }
@@ -120,6 +121,9 @@ export const queryBrowserSetPollInterval = (pollInterval: number) =>
 export const queryBrowserSetTimespan = (timespan: number) =>
   action(ActionType.QueryBrowserSetTimespan, { timespan });
 
+export const queryBrowswerToggleAllSeries = (index: number) => 
+  action(ActionType.QueryBrowserToggleAllSeries, {index});
+
 export const queryBrowserToggleIsEnabled = (index: number) =>
   action(ActionType.QueryBrowserToggleIsEnabled, { index });
 
@@ -127,6 +131,8 @@ export const queryBrowserToggleSeries = (index: number, labels: { [key: string]:
   action(ActionType.QueryBrowserToggleSeries, { index, labels });
 
 export const setAlertCount = (alertCount) => action(ActionType.SetAlertCount, { alertCount });
+
+
 
 const actions = {
   alertingErrored,
@@ -152,6 +158,7 @@ const actions = {
   queryBrowserSetMetrics,
   queryBrowserSetPollInterval,
   queryBrowserSetTimespan,
+  queryBrowswerToggleAllSeries,
   queryBrowserToggleIsEnabled,
   queryBrowserToggleSeries,
   setAlertCount,

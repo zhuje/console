@@ -55,6 +55,7 @@ import {
   queryBrowserRunQueries,
   queryBrowserSetAllExpanded,
   queryBrowserSetPollInterval,
+  queryBrowswerToggleAllSeries,
   queryBrowserToggleIsEnabled,
   queryBrowserToggleSeries,
   toggleGraphs,
@@ -310,20 +311,20 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
     observe.getIn(['queryBrowser', 'lastRequestTime']),
   );
 
-  const isDisabledSeriesEmpty = useSelector(({ observe }: RootState) =>
-    _.isEmpty(observe.getIn(['queryBrowser', 'queries', index, 'disabledSeries'])),
-  );
-
   const dispatch = useDispatch();
 
-  const toggleAllSeries = React.useCallback(
-    () =>
-      dispatch(
-        queryBrowserPatchQuery(index, {
-          disabledSeries: isDisabledSeriesEmpty ? series : [],
-        }),
-      ),
-    [dispatch, index, isDisabledSeriesEmpty, series],
+  // TODO: update function name 
+  // JZ NOTES: useCallback memoizes function, [dispatch and index] are dependencies and the 
+  // component will only render if the dependencies are changed  
+  const toggleAllSeries2 = React.useCallback(()=> dispatch(queryBrowswerToggleAllSeries(index)),[
+    dispatch,
+    index,
+  ]);
+
+
+  // TODO: MOVE INSIDE ACTION
+  const isDisabledSeriesEmpty = useSelector(({ observe }: RootState) =>
+    _.isEmpty(observe.getIn(['queryBrowser', 'queries', index, 'disabledSeries'])),
   );
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
@@ -463,7 +464,7 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
           <Button
             variant="link"
             isInline
-            onClick={toggleAllSeries}
+            onClick={toggleAllSeries2}
             className="query-browser__series-select-all-btn"
           >
             {isDisabledSeriesEmpty ? t('public~Unselect all') : t('public~Select all')}

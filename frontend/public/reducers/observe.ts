@@ -10,6 +10,7 @@ import {
 import { Alert } from '../components/monitoring/types';
 import { isSilenced } from '../components/monitoring/utils';
 
+
 export type ObserveState = ImmutableMap<string, any>;
 
 const newQueryBrowserQuery = (): ImmutableMap<string, any> =>
@@ -234,6 +235,29 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
     case ActionType.QueryBrowserSetTimespan:
       return state.setIn(['queryBrowser', 'timespan'], action.payload.timespan);
 
+    case ActionType.QueryBrowserToggleAllSeries: {
+      console.log("CHEESE hello world from reducer queryBrowswerToggleAll")
+
+      const index = action.payload.index;
+      
+      const isDisabledSeriesEmpty = _.isEmpty(state.getIn(['queryBrowser', 'queries',  index, 'disabledSeries']));
+      //console.log("CHEESE-ISDISABLEDSERIESEMPTY" + isDisabledSeriesEmpty)
+      
+      const series = state.getIn(['queryBrowser', 'queries', index, 'series']);
+      //console.log("CHEESE-SERIES" + series);
+      
+      const patch =  {disabledSeries: isDisabledSeriesEmpty ? series : []}
+      //console.log("CHEESE-PATCH" + patch)
+      
+      const query = state.hasIn(['queryBrowser', 'queries', index])
+      ? ImmutableMap(patch)
+      : newQueryBrowserQuery().merge(patch);
+      return state.mergeIn(['queryBrowser', 'queries', index], query);
+      
+
+
+    }
+    
     case ActionType.QueryBrowserToggleIsEnabled: {
       const query = state.getIn(['queryBrowser', 'queries', action.payload.index]);
       const isEnabled = !query.get('isEnabled');
