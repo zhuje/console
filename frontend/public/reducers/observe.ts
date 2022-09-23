@@ -156,6 +156,9 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
     case ActionType.ToggleGraphs:
       return state.set('hideGraphs', !state.get('hideGraphs'));
 
+    // TODO: try .unshift(newQueryBrowserQuery()) to add the newQuery to the front
+    // of the array instead of the back
+    // https://www.geeksforgeeks.org/typescript-array-unshift-method/#:~:text=unshift()%20is%20an%20inbuilt,new%20length%20of%20the%20array.&text=Parameter%3A%20This%20method%20accepts%20n,the%20front%20of%20the%20array.
     case ActionType.QueryBrowserAddQuery:
       return state.setIn(
         ['queryBrowser', 'queries'],

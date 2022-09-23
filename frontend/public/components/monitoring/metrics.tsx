@@ -586,6 +586,7 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
     }
   }, [dispatch]);
 
+  // TODO: This is where the actual queriesList is being rendered
   /* eslint-disable react-hooks/exhaustive-deps */
   // Use React.useMemo() to prevent these two arrays being recreated on every render, which would
   // trigger unnecessary re-renders of QueryBrowser, which can be quite slow
@@ -677,6 +678,8 @@ const RunQueriesButton: React.FC<{}> = () => {
   );
 };
 
+// TODO: Does the index or key have anything to do with the order it is redenered?
+// OR is this just required as a mapped component
 const QueriesList: React.FC<{}> = () => {
   const count = useSelector(
     ({ observe }: RootState) => observe.getIn(['queryBrowser', 'queries']).size,
