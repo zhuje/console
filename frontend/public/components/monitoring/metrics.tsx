@@ -694,10 +694,17 @@ const QueriesList: React.FC<{}> = () => {
     ({ observe }: RootState) => observe.getIn(['queryBrowser', 'queries']).size,
   );
 
+  const queries = useSelector(
+    ({ observe }: RootState) => observe.getIn(['queryBrowser', 'queries']),
+  );
+
   return (
     <>
-      {_.range(count).map((i) => (
-        <Query index={i} key={i} />
+      {_.range(count).reverse().map((i) => (
+        <div> 
+          <h1> index: {i}   key: {queries.get(i).get("id")}  </h1>
+        <Query index={i} key={queries.get(i).get("id")} />
+        </div>
       ))}
     </>
   );
