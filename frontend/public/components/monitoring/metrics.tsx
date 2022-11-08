@@ -241,6 +241,11 @@ const SeriesButton2: React.FC<SeriesButtonProps2> = ({ id, labels }) => {
       .reduce((sum, q) => sum + _.size(q.get('series')), 0);
     const seriesIndex = _.findIndex(series, (s) => _.isEqual(s, labels));
 
+    console.log("JZ SeriesButton > colorOffset : ", colorOffset )
+    console.log("JZ SeriesButton > seriesIndex : ", seriesIndex )
+    console.log("JZ SeriesButton > colors.length : ", colors.length )
+    console.log("JZ SeriesButton > colorsIndex = (colorOffset + seriesIndex) % colors.length : ", (colorOffset + seriesIndex) % colors.length )
+
     // TODO: colors.length might be the reason why the colors QueryTable don't make the Graph 
     return [(colorOffset + seriesIndex) % colors.length, false, false];
   });

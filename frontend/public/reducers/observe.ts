@@ -289,6 +289,8 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
 
     case ActionType.QueryBrowserPatchQuery2: {
       const { id, patch } = action.payload;
+
+
       if (!state.hasIn(['queryBrowser2', 'queries2', id])) {
         var newQuery = newQueryBrowserQuery2();
         newQuery[0][1] = newQuery[0][1].merge(patch);
@@ -297,6 +299,7 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
       const query = ImmutableMap(patch)
       return state.mergeIn(['queryBrowser2', 'queries2', id], query);
     }
+
 
     case ActionType.QueryBrowserRunQueries: {
       const queries = state.getIn(['queryBrowser', 'queries']).map((q) => {
