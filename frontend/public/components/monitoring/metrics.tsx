@@ -892,7 +892,7 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
   }
 
   const queryKeys = sortedQueryKeys(SortDirection.Descending);
-  
+
   const insertExampleQuery = () => {
     const focusedIndex = focusedQuery?.id ?? queryKeys[0];
     const text = 'sort_desc(sum(sum_over_time(ALERTS{alertstate="firing"}[24h])) by (alertname))';
@@ -919,6 +919,8 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
   }
 
   return (
+    // TODO: need to update reducer > queryBrowserPatchQuery so that queryIDs can be referenced in the reducer instead of 
+    // individual page 
     <QueryBrowser
       defaultTimespan={30 * 60 * 1000}
       disabledSeries={disabledSeries}
@@ -932,20 +934,16 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
 // TODO: Delete test component 
 const TestQueryButton: React.FC<{}> = () => {
   const { t } = useTranslation();
+  const interval = useSelector(({ observe }: RootState) => observe.getIn(['queryBrowser2', 'pollInterval']));
 
-  const focusedIndex = () => {
-    // const focusQuery  focusedQuery?.index ?? 0;
-    // const index = queries[focusedIndex] ? focusedIndex : 0;
-    // const text = 'sort_desc(sum(sum_over_time(ALERTS{alertstate="firing"}[24h])) by (alertname))';
-    // dispatch(queryBrowserPatchQuery(index, { isEnabled: true, query: text, text }));
-  
-    console.log("JZ TESTBUTTON > focusedIndex :" + JSON.stringify(focusedQuery)) 
+  const test = () => {
+    console.log(interval)
   }
-
+  
   return (
     <Button
       className="query-browser__inline-control"
-      onClick={focusedIndex}
+      onClick={test}
       type="button"
       variant="secondary"
     >
@@ -954,6 +952,9 @@ const TestQueryButton: React.FC<{}> = () => {
   );
 };
 
+// JZ NOTE: 
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 const AddQueryButton: React.FC<{}> = () => {
   const { t } = useTranslation();
 
@@ -972,6 +973,9 @@ const AddQueryButton: React.FC<{}> = () => {
   );
 };
 
+// JZ NOTE: 
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 const RunQueriesButton: React.FC<{}> = () => {
   const { t } = useTranslation();
 
@@ -985,7 +989,9 @@ const RunQueriesButton: React.FC<{}> = () => {
   );
 };
 
-
+// JZ NOTE: 
+// Refactor : Need to get rid of all the testing outputs to the DOM 
+// FunctionComponent Reuse: none 
 const QueriesList: React.FC<{}> = () => {
 
   // TODO: delete these 
@@ -1004,7 +1010,7 @@ const QueriesList: React.FC<{}> = () => {
     <>
       {/* TODO: Delete OUTPUT  */}
       <div>
-        <div>
+        <div key={'testing'}>
             QueriesList: {queries.toString()}
             <br/>
             QueriesList2: {queries2.toString()}
@@ -1025,10 +1031,12 @@ const QueriesList: React.FC<{}> = () => {
 
 };
 
-
+// JZ NOTE: 
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 const PollIntervalDropdown = () => {
   const interval = useSelector(({ observe }: RootState) =>
-    observe.getIn(['queryBrowser', 'pollInterval']),
+    observe.getIn(['queryBrowser2', 'pollInterval']),
   );
 
   const dispatch = useDispatch();
@@ -1039,13 +1047,16 @@ const PollIntervalDropdown = () => {
   return <IntervalDropdown interval={interval} setInterval={setInterval} />;
 };
 
+// JZ NOTE: 
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 const QueryBrowserPage_: React.FC<{}> = () => {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
 
   // Clear queries on unmount
-  React.useEffect(() => () => dispatch(queryBrowserDeleteAllQueries()), [dispatch]);
+  React.useEffect(() => () => dispatch(queryBrowserDeleteAllQueries2()), [dispatch]);
 
   return (
     <>
@@ -1100,12 +1111,6 @@ type QueryTableProps = {
 type QueryTableProps2 = {
   id: string;
   namespace?: string;
-};
-
-// TODO: Delete 
-type SeriesButtonProps = {
-  index: number;
-  labels: PrometheusLabels;
 };
 
 type SeriesButtonProps2 = {
