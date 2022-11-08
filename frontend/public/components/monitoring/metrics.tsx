@@ -119,7 +119,6 @@ const sortedQueryKeys = (sortDirection:SortDirection) => {
   return sortedQueries.keySeq();
 }
 
-
 // JZ NOTE: 
 // Refactor : DONE 
 // FunctionComponent Reuse: NONE  
@@ -233,6 +232,8 @@ const SeriesButton2: React.FC<SeriesButtonProps2> = ({ id, labels }) => {
       return [null, false, true];
     }
 
+    // JZ NOTE: I think this is where the bug is -- we need to offset colors 
+    // by the number of series in the previous query
     const colorOffset = observe
       .getIn(['queryBrowser2', 'queries2'])
       .take(id)
@@ -346,7 +347,7 @@ const QueryKebab2: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
-// JZ NOTE: Left off Here NOV 4 5:30pm
+// JZ NOTE: LEFT OFF here on NOV7 8pm
 
 export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
   const { t } = useTranslation();
@@ -364,11 +365,14 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
   const isExpanded = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser2', 'queries2', id, 'isExpanded']),
   );
-  // const pollInterval = useSelector(({ observe }: RootState) =>
-  //   observe.getIn(['queryBrowser2', 'pollInterval'], 15 * 1000),
-  // );
-  const pollInterval = 15 * 1000
 
+  // TODO: pollInterval is coming up as null still and not setting to 15*1000
+  const pollInterval = useSelector(({ observe }: RootState) =>
+    observe.getIn(['queryBrowser2', 'pollInterval'], 15 * 1000),
+  );
+
+  console.log("JZ QueryTable2 > pollInterval : " + pollInterval)
+  
   const query = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser2', 'queries2', id, 'query']),
   );
@@ -402,8 +406,6 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
 
   console.log("JZ Prometheus data: " +  JSON.stringify(data))
   console.log("JZ PollInterval data: " +  JSON.stringify(pollInterval))
-
-
 
   // JZ NOTES: saves callback and poll the request at set time intervals 
   usePoll(tick, pollInterval, namespace, query, span, lastRequestTime);
@@ -456,11 +458,6 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
   }
 
   const transforms = [sortable, wrappable];
-
-  // JZ LEFT OFF HERE Oct 19 5:30pm -- Query{...series:undefined} -- Prometheus data is not getting properly set 
-  // Hacked this -- by queryBrowserPatchQuery
-  // const dispatch = useDispatch();
-  // dispatch(queryBrowserPatchQuery2(id, {series: data.result}))
 
   const buttonCell = (labels) => ({ title: <SeriesButton2 id={id} labels={labels} /> });
 

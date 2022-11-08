@@ -336,8 +336,11 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
     case ActionType.QueryBrowserSetMetrics:
       return state.setIn(['queryBrowser', 'metrics'], action.payload.metrics);
 
+    // JZ NOTE: 
+    // Refactor : NONE  
+    // Reducer Use other than metrics.tsx: none  
     case ActionType.QueryBrowserSetPollInterval:
-      return state.setIn(['queryBrowser', 'pollInterval'], action.payload.pollInterval);
+      return state.setIn(['queryBrowser2', 'pollInterval'], action.payload.pollInterval);
 
     case ActionType.QueryBrowserSetTimespan:
       return state.setIn(['queryBrowser', 'timespan'], action.payload.timespan);
