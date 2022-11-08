@@ -779,6 +779,11 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
           });
           setGraphData(newGraphData);
 
+          // TODO: <Query-Browser /> is a component that is reused in a lot of other components 
+          // queryBrowserPatchQuery(i , ...) work on the old struct and will break, can leave `i` as 
+          // is and use new queryBrowserPatchQuery2() reducer but it will create new Queries ... which doesn't 
+          // help the re-rendering 
+          // JZ NOTE: Alternative approach accept the index, `i`, and do query sorting and convert to list in reducer 
           if (_.isEmpty(queryIDs)) {
             _.each(newResults, (r, i) => 
               dispatch(queryBrowserPatchQuery(i, { series: r ? _.map(r, 'metric') : 'undefined' })) 

@@ -347,12 +347,17 @@ const QueryKebab2: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
-// JZ NOTE: LEFT OFF here on NOV7 8pm
 
+// JZ NOTE: 
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
   const { t } = useTranslation();
 
-  // Set all the Variables 
+  // JZ NOTE: used as testing only, to be removed 
+  // Check this in Master Branch 
+  React.useEffect(() => console.warn('QueryTable2 changed! ID : ', id), [QueryTable2])
+
   const [data, setData] = React.useState<PrometheusData>();
   const [error, setError] = React.useState<PrometheusAPIError>();
   const [page, setPage] = React.useState(1);
@@ -365,14 +370,10 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
   const isExpanded = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser2', 'queries2', id, 'isExpanded']),
   );
-
-  // TODO: pollInterval is coming up as null still and not setting to 15*1000
+  // TODO: pollInterval is coming up as null still and not setting to 15*1000 is it suppose to?
   const pollInterval = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser2', 'pollInterval'], 15 * 1000),
   );
-
-  console.log("JZ QueryTable2 > pollInterval : " + pollInterval)
-  
   const query = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser2', 'queries2', id, 'query']),
   );
@@ -387,7 +388,6 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
-  // JZ if there's a query and the table row is send a request to Prometheus 
   const tick = () => {
     if (isEnabled && isExpanded && query) {
       safeFetch(getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, namespace, query }))
@@ -404,13 +404,8 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
     }
   };
 
-  console.log("JZ Prometheus data: " +  JSON.stringify(data))
-  console.log("JZ PollInterval data: " +  JSON.stringify(pollInterval))
-
-  // JZ NOTES: saves callback and poll the request at set time intervals 
   usePoll(tick, pollInterval, namespace, query, span, lastRequestTime);
 
-  // JZ clear previous data? 
   React.useEffect(() => {
     setData(undefined);
     setError(undefined);
@@ -445,9 +440,6 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
   const result = expiredSeries.length
     ? [...data.result, ...expiredSeries.map((metric) => ({ metric }))]
     : data.result;
-
-  console.log("JZ SeriesBtn2 > QueryTable2 > expiredSeries : ", JSON.stringify(expiredSeries))
-  console.log("JZ SeriesBtn2 > QueryTable2 > result : ", JSON.stringify(result))
 
   if (!result || result.length === 0) {
     return (
@@ -520,10 +512,6 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
     }
   }
 
-  // console.log("JZ QueryTable2 > Rows %s", rows)
-  // console.log("JZ QueryTable2 > columns %s", columns)
-
-
   const onSort = (e, i, direction) => setSortBy({ index: i, direction });
 
   const tableRows = rows.slice((page - 1) * perPage, page * perPage).map((cells) => ({ cells }));
@@ -558,7 +546,6 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
 };
 
 // JZ NOTE: This Component is referenced in MetricsChart.tsx
-// need to refactor 
 export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
   const { t } = useTranslation();
 
@@ -748,6 +735,8 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
   );
 };
 
+// JZ NOTE: 
+// Refactor : NONE 
 const PromQLExpressionInput = (props) => (
   <AsyncComponent
     loader={() => import('./promql-expression-input').then((c) => c.PromQLExpressionInput)}
@@ -755,6 +744,9 @@ const PromQLExpressionInput = (props) => (
   />
 );
 
+// JZ NOTE:
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 const Query2 : React.FC<{ id: string }> = ({ id }) => {
   const { t } = useTranslation();
 
@@ -834,7 +826,9 @@ const Query2 : React.FC<{ id: string }> = ({ id }) => {
   );
 }
 
-
+// JZ NOTE: 
+// Refactor : DONE
+// FunctionComponent Reuse: none 
 const QueryBrowserWrapper: React.FC<{}> = () => {
   const { t } = useTranslation();
 
@@ -851,9 +845,9 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
 
     // Initialize queries from URL parameters
     React.useEffect(() => {
-      const searchParams = getURLSearchParams(); // get URL
-      for (let i = 0; _.has(searchParams, `query${i}`); ++i) { // iterate, search all the queries of the URL 
-        const query = searchParams[`query${i}`]; // patchQuery
+      const searchParams = getURLSearchParams(); 
+      for (let i = 0; _.has(searchParams, `query${i}`); ++i) { 
+        const query = searchParams[`query${i}`]; 
         dispatch(
           queryBrowserPatchQuery2(sortedQueryKeys2.get(i), {
             isEnabled: true,
@@ -897,11 +891,12 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
     return null;
   }
 
+  const queryKeys = sortedQueryKeys(SortDirection.Descending);
+  
   const insertExampleQuery = () => {
-    const focusedIndex = focusedQuery?.index ?? 0;
-    const index = queries[focusedIndex] ? focusedIndex : 0;
+    const focusedIndex = focusedQuery?.id ?? queryKeys[0];
     const text = 'sort_desc(sum(sum_over_time(ALERTS{alertstate="firing"}[24h])) by (alertname))';
-    dispatch(queryBrowserPatchQuery(index, { isEnabled: true, query: text, text }));
+    dispatch(queryBrowserPatchQuery2(focusedIndex, { isEnabled: true, query: text, text }));
   };
 
   if (queryStrings.join('') === '') {
@@ -938,15 +933,19 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
 const TestQueryButton: React.FC<{}> = () => {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
-  const id = undefined; 
-  const patch = {test: "cheese!"}
-  const patchQuery2 = React.useCallback(() => dispatch(queryBrowserPatchQuery2(id, patch)), [dispatch]);
+  const focusedIndex = () => {
+    // const focusQuery  focusedQuery?.index ?? 0;
+    // const index = queries[focusedIndex] ? focusedIndex : 0;
+    // const text = 'sort_desc(sum(sum_over_time(ALERTS{alertstate="firing"}[24h])) by (alertname))';
+    // dispatch(queryBrowserPatchQuery(index, { isEnabled: true, query: text, text }));
+  
+    console.log("JZ TESTBUTTON > focusedIndex :" + JSON.stringify(focusedQuery)) 
+  }
 
   return (
     <Button
       className="query-browser__inline-control"
-      onClick={patchQuery2}
+      onClick={focusedIndex}
       type="button"
       variant="secondary"
     >
@@ -998,24 +997,8 @@ const QueriesList: React.FC<{}> = () => {
     ({ observe }: RootState) => observe.getIn(['queryBrowser2', 'queries2']),
   );
 
-  // // Sort queries by the attribute `sortOrder` so that 
-  // // newer queries preceed older queries. 
-  // // DESCENDING ORDER 
-  // const sortedQueries = queries2.sort((k1,k2) => {
-  //   if (k1.get("sortOrder") < k2.get("sortOrder")) {
-  //     return 1;
-  //   }
-  //   if (k1.get("sortOrder") > k2.get("sortOrder")) {
-  //       return -1;
-  //   }
-  //   return 0;
-  //  }
-  // )
-
   const queryKeys = sortedQueryKeys(SortDirection.Descending);
-
   
-  // State > Queries > Object structure is List[Map<string:string>]
   // TODO: QueriesList need to sort the map by ID then render 
   return (
     <>
