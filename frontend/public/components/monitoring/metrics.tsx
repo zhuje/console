@@ -551,6 +551,7 @@ export const QueryTable2: React.FC<QueryTableProps2> = ({ id, namespace }) => {
 };
 
 // JZ NOTE: This Component is referenced in MetricsChart.tsx
+// Refactor to accept Index and then sortQuerys into an array in metrics.tsx and access it 
 export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
   const { t } = useTranslation();
 

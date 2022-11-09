@@ -102,6 +102,7 @@ export const queryBrowserAddQuery = () => action(ActionType.QueryBrowserAddQuery
 
 export const queryBrowserAddQuery2 = () => action(ActionType.QueryBrowserAddQuery2);
 
+// JZ NOTE: Only in metric.tsx 
 export const queryBrowserDuplicateQuery = (index: number) =>
   action(ActionType.QueryBrowserDuplicateQuery, { index });
 
@@ -119,6 +120,7 @@ export const queryBrowserDeleteAllSeries2 = () => action(ActionType.QueryBrowser
 export const queryBrowserDismissNamespaceAlert = () =>
   action(ActionType.QueryBrowserDismissNamespaceAlert);
 
+// JZ NOTE: Only in metric.tsx 
 export const queryBrowserDeleteQuery = (index: number) =>
   action(ActionType.QueryBrowserDeleteQuery, { index });
 
@@ -148,12 +150,14 @@ export const queryBrowserSetPollInterval = (pollInterval: number) =>
 export const queryBrowserSetTimespan = (timespan: number) =>
   action(ActionType.QueryBrowserSetTimespan, { timespan });
 
+// JZ NOTE: only referenced in metric.tsx 
 export const queryBrowserToggleIsEnabled = (index: number) =>
   action(ActionType.QueryBrowserToggleIsEnabled, { index });
 
 export const queryBrowserToggleIsEnabled2 = (id: string) =>
   action(ActionType.QueryBrowserToggleIsEnabled2, { id });
 
+// JZ NOTE: only referenced in metric.tsx 
 export const queryBrowserToggleSeries = (index: number, labels: { [key: string]: unknown }) =>
   action(ActionType.QueryBrowserToggleSeries, { index, labels });
 
