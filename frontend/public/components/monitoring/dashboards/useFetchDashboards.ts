@@ -33,6 +33,7 @@ export const useFetchDashboards = (namespace: string): [Board[], boolean, string
               name: item.metadata.name,
             };
           } catch (e) {
+            console.warn(e);
             setError(
               t('public~Could not parse JSON data for dashboard "{{dashboard}}"', {
                 dashboard: item.metadata.name,

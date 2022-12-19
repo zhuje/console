@@ -198,6 +198,24 @@ const VariableOption = ({ itemKey }) =>
     </SelectOption>
   );
 
+// JZ NOTE: Each time the we select a different variable fetch data from Prometheus 
+// OU: 110 -- we Need to update `PrometheusEndpoint` so that it doesn't default 
+// to the single cluster Prometheus but is able to accept the `pluginProxyAlias` which 
+// is configured by the dynamic plugin. 
+// ## Allow Panels to load data from different sources 
+// ## Each Panel has a datasource, in the configMap. Datasource gets passed : 
+// ## configuring the operator > dynamic plugin > dashboard < configMap contains information about how data is displayed on dashboard.  
+// panel: {
+//   datasource: { 
+//     uid: <string>, 
+//     type: <string>, Data source type (e.g. “prometheus”) 
+//     pluginProxyAlias: <string>,  Configured by dynamic plugin  
+//   }
+// }
+// ## Console backend expoes follwing endpoint inorder to proxy the communication 
+// ## between plugin and the service 
+// `/api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>`
+
 const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace }) => {
   const { t } = useTranslation();
   const activePerspective = getActivePerspective(namespace);
@@ -233,6 +251,30 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
         timespan,
         namespace,
       });
+
+      // JZ TODO: replace 'PrometheusEndpoint' with proxy given in configMap, 
+      // JZ TODO: 1. run headless plugin to see how to use endpoint to query 2. Start a second PrometheusEndpoint to test 
+      // JZ NOTE: 
+      // `/api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>`from https://github.com/jgbernalp/dashboards-datasource-plugin
+      // /api/proxy/plugin/acm/search/pods?namespace=openshift-apiserver (example)
+      // `/api/proxy/plugin/dashboards-datasource-plugin/backend/`from https://github.com/jgbernalp/dashboards-datasource-plugin
+
+      /**
+       * # psuedo-code 
+       * if (panel.datasource.type === "prometheus" && panel.datasource.pluginProxyAlias){
+       *    const url = getProxyUrl({
+       *      endpoint: ProxyEndpoint, 
+       *      query: prometheusQuery, 
+       *      ...
+       *    })
+       * }
+       */
+
+      // JZ NOTE: After fetching form the ProxyUrl the data gets stored in redux 
+      // const VariableDropDown > onChange() -- dispatch(dashboardsPatchVariable(name)
+      // const Card > observe.getIn(['dashboards', activePerspective, 'variables'])
+
+
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
 
@@ -316,6 +358,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   );
 };
 
+// JZ NOTE: AllVariableDropDowns() gives all the options within each Dashboard 
 const AllVariableDropdowns = () => {
   const namespace = React.useContext(NamespaceContext);
   const variables = useSelector(({ observe }: RootState) =>
@@ -340,6 +383,7 @@ const Tag: React.FC<{ color: TagColor; text: string }> = React.memo(({ color, te
   </Label>
 ));
 
+// JZ NOTE: Dashboard Dropdown gives all the dashboards available 
 const DashboardDropdown: React.FC<DashboardDropdownProps> = React.memo(
   ({ items, onChange, selectedKey }) => {
     const { t } = useTranslation();
@@ -419,6 +463,7 @@ export const PollIntervalDropdown: React.FC<TimeDropdownsProps> = ({ namespace }
   );
 };
 
+// JZ NOTE: smaller component, ignore 
 const TimeDropdowns: React.FC<{}> = React.memo(() => {
   const namespace = React.useContext(NamespaceContext);
   return (
@@ -429,6 +474,7 @@ const TimeDropdowns: React.FC<{}> = React.memo(() => {
   );
 });
 
+// JZ NOTE: smaller component, ignore 
 const HeaderTop: React.FC<{}> = React.memo(() => {
   const { t } = useTranslation();
 
@@ -442,6 +488,7 @@ const HeaderTop: React.FC<{}> = React.memo(() => {
   );
 });
 
+// JZ NOTE: smaller component, ignore 
 const QueryBrowserLink = ({ queries }) => {
   const { t } = useTranslation();
   const params = new URLSearchParams();
@@ -462,6 +509,8 @@ const QueryBrowserLink = ({ queries }) => {
   );
 };
 
+// JZ NOTE: smaller component, ignore 
+
 // Determine how many columns a panel should span. If panel specifies a `span`, use that. Otherwise
 // look for a `breakpoint` percentage. If neither are specified, default to 12 (full width).
 const getPanelSpan = (panel: Panel): number => {
@@ -475,6 +524,7 @@ const getPanelSpan = (panel: Panel): number => {
   return 12;
 };
 
+// JZ NOTE: smaller component, ignore 
 const getPanelClassModifier = (panel: Panel): string => {
   const span: number = getPanelSpan(panel);
   switch (span) {
@@ -493,7 +543,12 @@ const getPanelClassModifier = (panel: Panel): string => {
   }
 };
 
+
+// JZ NOTE: Card digests the panel and outputs a graph type to render
 const Card: React.FC<CardProps> = React.memo(({ panel }) => {
+
+  console.log("JZ Card > panel : ", panel);
+
   const namespace = React.useContext(NamespaceContext);
   const activePerspective = getActivePerspective(namespace);
   const pollInterval = useSelector(({ observe }: RootState) =>
@@ -508,6 +563,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
 
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
+
+  console.log("JZ ${datasource}", panel.datasource)
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -620,6 +677,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   );
 });
 
+// JZ NOTE: Container for all the PanelsRows > Cards > Graphs 
 const PanelsRow: React.FC<{ row: Row }> = ({ row }) => {
   const showButton = row.showTitle && !_.isEmpty(row.title);
 
@@ -654,6 +712,7 @@ const PanelsRow: React.FC<{ row: Row }> = ({ row }) => {
   );
 };
 
+// JZ NOTE: maps Panels 
 const Board: React.FC<BoardProps> = ({ rows }) => (
   <>
     {_.map(rows, (row) => (
@@ -662,16 +721,79 @@ const Board: React.FC<BoardProps> = ({ rows }) => (
   </>
 );
 
+// JZ TODO: delete test fetch 
+const DEFAULT_PROXY_URL =
+  '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
+
+const ProxyTestPage: React.FC<any> = () =>  {
+  const [response, setResponse] = React.useState<string | undefined>(undefined);
+  const [endpoint, setEndpoint] = React.useState<string>(DEFAULT_PROXY_URL);
+
+  const handleEndpointChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEndpoint(e.target.value);
+  };
+
+  const handleFetch = () => {
+    fetch(endpoint)
+      .then(async (res) => {
+        console.log(res);
+
+        if (res.ok) {
+          const jsonResponse = await res.json();
+          setResponse(JSON.stringify(jsonResponse, null, 2));
+        } else {
+          throw new Error('Invalid response');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setResponse(String(err));
+      });
+  };
+
+  return (
+    <div style={{ margin: 'var(--pf-global--spacer--md)' }}>
+      <input
+        type="text"
+        onChange={handleEndpointChange}
+        value={endpoint}
+        style={{
+          width: '100%',
+          display: 'block',
+          marginBottom: 'var(--pf-global--spacer--md)',
+        }}
+      />
+      <button onClick={handleFetch}>Fetch</button>
+      <div>
+        <pre>{response}</pre>
+      </div>
+    </div>
+  );
+}
+
+// JZ TODO: ^^^ Delete Test
+
+
+
+
+
+
+// JZ NOTE: start; `useFetchDashboards()` contains `safeFetch('/api/console/monitoring-dashboard-config')`
+``
 const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ match }) => {
   const { t } = useTranslation();
 
+  // JZ NOTE: Get Namespace so we can set up the board 
   const dispatch = useDispatch();
-  const namespace = match.params?.ns;
+  const namespace = match.params?.ns; 
   const activePerspective = getActivePerspective(namespace);
   const [board, setBoard] = React.useState<string>();
-  const [boards, isLoading, error] = useFetchDashboards(namespace);
+  const [boards, isLoading, error] = useFetchDashboards(namespace); 
 
-  // Clear queries on unmount
+
+
+
+  // JZ NOTE: Clear previous data if there is any 
   React.useEffect(() => () => dispatch(queryBrowserDeleteAllQueries()), [dispatch]);
 
   // Clear variables on unmount for dev perspective
@@ -684,6 +806,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     [activePerspective, dispatch],
   );
 
+  // JZ NOTE: Get the board items (which will be pass to the Dashboard Dropdown )
   const boardItems = React.useMemo(
     () =>
       _.mapValues(_.mapKeys(boards, 'name'), (b, name) => ({
@@ -693,6 +816,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     [boards],
   );
 
+  // JZ NOTE: changeboard() get called when the with a Dashboard Dropdown selection
   const changeBoard = React.useCallback(
     (newBoard: string) => {
       let timeSpan: string;
@@ -703,6 +827,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
 
       const refreshInterval = getQueryArgument('refreshInterval');
 
+      // JZ NOTE: if there board is selected, for after time interval 
       if (board) {
         timeSpan = null;
         endTime = null;
@@ -719,6 +844,10 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
           url = `${url}${window.location.search}`;
         }
       }
+
+      // JZ NOTE: if a newBoard has been slected then update redux 
+      // ActivePerspective is : admin vs dev, board: Dashboard dropdown selected, boards: all Dashboard dropdown items, namespace: undefined, default... 
+      // AllVariables is all the variables related to the board...query, value 
       if (newBoard !== board) {
         if (getQueryArgument('dashboard') !== newBoard) {
           history.replace(url);
@@ -746,6 +875,8 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     [activePerspective, board, boards, dispatch, namespace],
   );
 
+  console.log("JZ board, ", board)
+
   // Display dashboard present in the params or show the first board
   React.useEffect(() => {
     if (!board && !_.isEmpty(boards)) {
@@ -754,6 +885,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     }
   }, [board, boards, changeBoard, match.params.board, namespace]);
 
+  // JZ NOTE: getQueryArgyment from URL :: http://localhost:9000/monitoring/dashboards/grafana-dashboard-k8s-resources-cluster 
   React.useEffect(() => {
     const newBoard = getQueryArgument('dashboard');
     const allVariables = getAllVariables(boards, newBoard, namespace);
@@ -795,6 +927,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
         </Helmet>
       )}
       <NamespaceContext.Provider value={namespace}>
+        <ProxyTestPage/> 
         <div className="co-m-nav-title co-m-nav-title--detail">
           {!namespace && <HeaderTop />}
           <div className="monitoring-dashboards__variables">

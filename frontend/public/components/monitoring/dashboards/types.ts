@@ -22,6 +22,11 @@ type YAxis = {
 
 export type Panel = {
   breakpoint?: string;
+  datasource?: {
+    uid: string; 
+    type: string;
+    pluginProxyAlias: string;
+  };
   decimals?: number;
   format?: string;
   gridPos?: {

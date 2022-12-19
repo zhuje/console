@@ -86,6 +86,8 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
       );
 
     case ActionType.DashboardsPatchAllVariables:
+      console.log("JZ allVariables ", JSON.stringify(action.payload.variables) )
+      console.log("JZ activePerspective ", JSON.stringify(action.payload.perspective) )
       return state.setIn(
         ['dashboards', action.payload.perspective, 'variables'],
         ImmutableMap(action.payload.variables),

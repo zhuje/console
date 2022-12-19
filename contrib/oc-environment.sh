@@ -51,3 +51,32 @@ HELM_REPOSITORY_CONFIG="/tmp/repositories.yaml"
 export HELM_REPOSITORY_CONFIG
 
 echo "Using $BRIDGE_K8S_MODE_OFF_CLUSTER_ENDPOINT"
+
+
+# JZ NOTE: test dashboard plugin -- for the console to know about the plugin you can add
+CONSOLE_IMAGE=${CONSOLE_IMAGE:="quay.io/openshift/origin-console:latest"}
+export CONSOLE_IMAGE
+CONSOLE_PORT=${CONSOLE_PORT:=9000}
+export CONSOLE_PORT
+PLUGIN_PROXY='{"services": [{"consoleAPIPath": "/api/proxy/plugin/dashboards-datasource-plugin/backend/", "authorize": true, "endpoint": "http://localhost:9000/api/kubernetes/api/v1/"}]}'
+export PLUGIN_PROXY
+
+echo "API Server: $BRIDGE_K8S_MODE_OFF_CLUSTER_ENDPOINT"
+echo "Console Image: $CONSOLE_IMAGE"
+echo "Console URL: http://localhost:${CONSOLE_PORT}"
+echo "Plugin proxy: ${PLUGIN_PROXY}"
+
+# Prefer podman if installed. Otherwise, fall back to docker.
+if [ -x "$(command -v podman)" ]; then
+    if [ "$(uname -s)" = "Linux" ]; then
+        # Use host networking on Linux since host.containers.internal is unreachable in some environments.
+        BRIDGE_PLUGINS="${npm_package_consolePlugin_name}=http://localhost:9001"
+        podman run --pull always --rm --network=host --env-file <(set | grep BRIDGE) --env BRIDGE_PLUGIN_PROXY="${PLUGIN_PROXY}" $CONSOLE_IMAGE
+    else
+        BRIDGE_PLUGINS="${npm_package_consolePlugin_name}=http://host.containers.internal:9001"
+        podman run --pull always --rm -p "$CONSOLE_PORT":9000 --env-file <(set | grep BRIDGE) --env BRIDGE_PLUGIN_PROXY="${PLUGIN_PROXY}" $CONSOLE_IMAGE
+    fi
+else
+    BRIDGE_PLUGINS="${npm_package_consolePlugin_name}=http://host.docker.internal:9001"
+    docker run --pull always --rm -p "$CONSOLE_PORT":9000 --env-file <(set | grep BRIDGE) --env BRIDGE_PLUGIN_PROXY="${PLUGIN_PROXY}" $CONSOLE_IMAGE
+fi
