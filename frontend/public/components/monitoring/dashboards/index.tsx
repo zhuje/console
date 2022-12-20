@@ -276,6 +276,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       // const Card > observe.getIn(['dashboards', activePerspective, 'variables'])
 
 
+    
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
 
@@ -548,7 +549,7 @@ const getPanelClassModifier = (panel: Panel): string => {
 // JZ NOTE: Card digests the panel and outputs a graph type to render
 const Card: React.FC<CardProps> = React.memo(({ panel }) => {
 
-  console.log("JZ Card > panel : ", panel);
+  // console.log("JZ Card > panel : ", panel);
 
   const namespace = React.useContext(NamespaceContext);
   const activePerspective = getActivePerspective(namespace);
@@ -565,7 +566,19 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
 
-  console.log("JZ ${datasource}", panel.datasource)
+  // JZ TODO: move this to part of the code that fetches data 
+  if (panel.datasource?.type && panel.datasource?.pluginProxyAlias){
+    const dataType = panel.datasource.type.trim().toLowerCase();
+    // console.log("JZ data type: " + dataType); 
+    if (dataType === "prometheus"){    
+      // then use the proxyURL to fetch data 
+    } else {
+      console.warn("Dashboard definition for panel datasource could not be parsed, please check configurations."
+      + `Data source attributes are uid:${panel.datasource.uid}, type:${panel.datasource.type}, and pluginProxyAlias:${panel.datasource.pluginProxyAlias}`)
+    }
+  }
+
+
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
