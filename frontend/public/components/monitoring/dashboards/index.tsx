@@ -259,6 +259,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       // /api/proxy/plugin/acm/search/pods?namespace=openshift-apiserver (example)
       // `/api/proxy/plugin/dashboards-datasource-plugin/backend/`from https://github.com/jgbernalp/dashboards-datasource-plugin
 
+      
       /**
        * # psuedo-code 
        * if (panel.datasource.type === "prometheus" && panel.datasource.pluginProxyAlias){
