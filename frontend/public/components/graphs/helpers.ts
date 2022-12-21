@@ -47,12 +47,36 @@ export const getPrometheusURL = (
   return `${basePath}/${props.endpoint}?${params.toString()}`;
 };
 
+  // # getPrometheusURL 
+  // http://localhost:9000/api/prometheus/api/v1/query?query=sum%28etcd_server_has_leader%7Bjob%3D%22etcd%22%7D%29
+  // ${basePath} = /api/prometheus
+  // ${props.endpoint} = /api/v1/query
+  // ?
+  // ${configMap.target.expr > index.tsx.queries > helpers.ts.PrometheusURLProps > params.toString} = query=sum%28etcd_server_has_leader%7Bjob%3D%22etcd%22%7D%29
+
+  // # prometheusProxyURL 
+  // '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
+  // basepath = '/api/proxy/plugin/dashboards-datasource-plugin/backend '
+  // ${props.endpoint} = PrometheusEndpoint.QUERY = 'api/v1/query',
+
+// # oc-environment.sh
+// BRIDGE_PLUGINS="dashboards-datasource-plugin=http://localhost:9001"
+// export BRIDGE_PLUGINS
+// PROXY_ENDPOINT="http://localhost:9000/api/prometheus/"
+// export PROXY_ENDPOINT
+// BRIDGE_PLUGIN_PROXY="{\"services\": [{\"consoleAPIPath\": \"/api/proxy/plugin/dashboards-datasource-plugin/backend/\", \"authorize\": true, \"endpoint\": \"${PROXY_ENDPOINT}\"}]}"
+// export BRIDGE_PLUGIN_PROXY
+
+
+
 type PrometheusURLProps = {
   endpoint: PrometheusEndpoint;
   endTime?: number;
   namespace?: string;
   query?: string;
+  proxy?: boolean; 
   samples?: number;
   timeout?: string;
   timespan?: number;
 };
+

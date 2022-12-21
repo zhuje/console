@@ -70,6 +70,7 @@ import {
   getAllVariables,
 } from './monitoring-dashboard-utils';
 
+
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
 const isIntervalVariable = (itemKey: string): boolean =>
@@ -275,8 +276,6 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       // const VariableDropDown > onChange() -- dispatch(dashboardsPatchVariable(name)
       // const Card > observe.getIn(['dashboards', activePerspective, 'variables'])
 
-
-    
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
 
@@ -567,6 +566,15 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const [, wasEverVisible] = useIsVisible(ref);
 
   // JZ TODO: move this to part of the code that fetches data 
+  // datasource: {
+  //   uid: <string>
+  //   type: <string>
+  //   pluginProxyAlias: <string> 
+  // }
+  // '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
+
+
+  const testPluginProxyAlias =   '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
   if (panel.datasource?.type && panel.datasource?.pluginProxyAlias){
     const dataType = panel.datasource.type.trim().toLowerCase();
     // console.log("JZ data type: " + dataType); 
