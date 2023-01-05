@@ -55,7 +55,13 @@ const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Bullseye className="monitoring-dashboards__single-stat">{children}</Bullseye>
 );
 
-const SingleStat: React.FC<Props> = ({ panel, pollInterval, query, namespace }) => {
+const SingleStat: React.FC<Props> = ({
+  panel,
+  pollInterval,
+  query,
+  namespace,
+  pluginProxyAlias,
+}) => {
   const {
     decimals,
     format,
@@ -74,8 +80,22 @@ const SingleStat: React.FC<Props> = ({ panel, pollInterval, query, namespace }) 
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
+  const defaultURL = getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace });
+  const [url, setURL] = React.useState<string>(defaultURL);
+  React.useEffect(() => {
+    if (pluginProxyAlias) {
+      setURL(
+        getPrometheusURL(
+          { endpoint: PrometheusEndpoint.QUERY, query, namespace },
+          '',
+          pluginProxyAlias,
+        ),
+      );
+    }
+  }, [namespace, pluginProxyAlias, query]);
+
   const tick = () =>
-    safeFetch(getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace }))
+    safeFetch(url)
       .then((response: PrometheusResponse) => {
         setError(undefined);
         setIsLoading(false);
@@ -128,6 +148,7 @@ type Props = {
   pollInterval: number;
   query: string;
   namespace?: string;
+  pluginProxyAlias?: string;
 };
 
 export default SingleStat;

@@ -17,6 +17,7 @@ type Props = {
   units: string;
   onZoomHandle?: (timeRange: number, endTime: number) => void;
   namespace?: string;
+  pluginProxyAlias?: string;
 };
 
 const Graph: React.FC<Props> = ({

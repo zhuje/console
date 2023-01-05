@@ -221,3 +221,5 @@ export enum PrometheusEndpoint {
   RULES = 'api/v1/rules',
   TARGETS = 'api/v1/targets',
 }
+
+export const PluginDataTypes = ['prometheus'];
