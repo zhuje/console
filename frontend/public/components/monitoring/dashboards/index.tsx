@@ -711,55 +711,6 @@ const Board: React.FC<BoardProps> = ({ rows }) => (
   </>
 );
 
-// JZ TODO: delete test fetch
-const DEFAULT_PROXY_URL =
-  '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
-
-const ProxyTestPage: React.FC<any> = () => {
-  const [response, setResponse] = React.useState<string | undefined>(undefined);
-  const [endpoint, setEndpoint] = React.useState<string>(DEFAULT_PROXY_URL);
-
-  const handleEndpointChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEndpoint(e.target.value);
-  };
-
-  const handleFetch = () => {
-    fetch(endpoint)
-      .then(async (res) => {
-        if (res.ok) {
-          const jsonResponse = await res.json();
-          setResponse(JSON.stringify(jsonResponse, null, 2));
-        } else {
-          throw new Error('Invalid response');
-        }
-      })
-      .catch((err) => {
-        setResponse(String(err));
-      });
-  };
-
-  return (
-    <div style={{ margin: 'var(--pf-global--spacer--md)' }}>
-      <input
-        type="text"
-        onChange={handleEndpointChange}
-        value={endpoint}
-        style={{
-          width: '100%',
-          display: 'block',
-          marginBottom: 'var(--pf-global--spacer--md)',
-        }}
-      />
-      <button onClick={handleFetch}>Fetch</button>
-      <div>
-        <pre>{response}</pre>
-      </div>
-    </div>
-  );
-};
-
-// JZ TODO: ^^^ Delete Test
-
 const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ match }) => {
   const { t } = useTranslation();
 
@@ -894,7 +845,6 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
         </Helmet>
       )}
       <NamespaceContext.Provider value={namespace}>
-        <ProxyTestPage />
         <div className="co-m-nav-title co-m-nav-title--detail">
           {!namespace && <HeaderTop />}
           <div className="monitoring-dashboards__variables">
