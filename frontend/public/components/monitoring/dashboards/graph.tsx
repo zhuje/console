@@ -29,6 +29,7 @@ const Graph: React.FC<Props> = ({
   units,
   onZoomHandle,
   namespace,
+  pluginProxyAlias,
 }) => {
   const dispatch = useDispatch();
   const activePerspective = getActivePerspective(namespace);
@@ -62,6 +63,7 @@ const Graph: React.FC<Props> = ({
       timespan={timespan}
       units={units}
       namespace={namespace}
+      pluginProxyAlias={pluginProxyAlias}
     />
   );
 };

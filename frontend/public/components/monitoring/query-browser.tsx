@@ -656,6 +656,7 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
   namespace,
   onZoom,
   pollInterval,
+  pluginProxyAlias,
   queries,
   showLegend,
   showStackedControl = false,
@@ -734,20 +735,24 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
     // Define this once for all queries so that they have exactly the same time range and X values
     const now = Date.now();
 
+    const prometheusURL = (query) => {
+      const prometheusURLProps = {
+        endpoint: PrometheusEndpoint.QUERY_RANGE,
+        endTime: endTime || now,
+        namespace,
+        query,
+        samples,
+        timeout: '60s',
+        timespan: span,
+      };
+      if (pluginProxyAlias) {
+        return getPrometheusURL(prometheusURLProps, '', pluginProxyAlias);
+      }
+      return getPrometheusURL(prometheusURLProps);
+    };
+
     const allPromises = _.map(queries, (query) =>
-      _.isEmpty(query)
-        ? Promise.resolve()
-        : safeFetch(
-            getPrometheusURL({
-              endpoint: PrometheusEndpoint.QUERY_RANGE,
-              endTime: endTime || now,
-              namespace,
-              query,
-              samples,
-              timeout: '60s',
-              timespan: span,
-            }),
-          ),
+      _.isEmpty(query) ? Promise.resolve() : safeFetch(prometheusURL(query)),
     );
 
     return Promise.all(allPromises)
@@ -1037,6 +1042,7 @@ export type QueryBrowserProps = {
   namespace?: string;
   onZoom?: GraphOnZoom;
   pollInterval?: number;
+  pluginProxyAlias?: string;
   queries: string[];
   showLegend?: boolean;
   showStackedControl?: boolean;
