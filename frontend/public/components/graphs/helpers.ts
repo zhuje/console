@@ -36,7 +36,7 @@ const getSearchParams = ({
   return searchParams;
 };
 
-const DASHBOARD_PLUGIN_BASE_PATH = '/api/proxy/plugin/dashboards-datasource-plugin/';
+const DASHBOARD_PLUGIN_BASE_PATH = '/api/proxy/plugin/dashboards-datasource-plugin';
 
 export const getPrometheusURL = (
   props: PrometheusURLProps,

@@ -63,7 +63,7 @@ const perPageOptions: PerPageOptions[] = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
 }));
 
-const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace }) => {
+const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, pluginProxyAlias }) => {
   const [error, setError] = React.useState();
   const [isLoading, setLoading] = React.useState(true);
   const [data, setData] = React.useState();
@@ -76,12 +76,19 @@ const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace }) => 
 
   const { t } = useTranslation();
 
+  const url = (q) => {
+    if (pluginProxyAlias) {
+      return getPrometheusURL(
+        { endpoint: PrometheusEndpoint.QUERY, query: q, namespace },
+        '',
+        pluginProxyAlias,
+      );
+    }
+    return getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query: q, namespace });
+  };
+
   const tick = () => {
-    Promise.all(
-      queries.map((q) =>
-        safeFetch(getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query: q, namespace })),
-      ),
-    )
+    Promise.all(queries.map((q) => safeFetch(url(q))))
       .then((responses: PrometheusResponse[]) => {
         setError(undefined);
         setLoading(false);
@@ -207,6 +214,7 @@ type Props = {
   pollInterval: number;
   queries: string[];
   namespace?: string;
+  pluginProxyAlias?: string;
 };
 
 export default Table;
