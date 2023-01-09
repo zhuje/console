@@ -809,7 +809,6 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     }
   }, [board, boards, changeBoard, match.params.board, namespace]);
 
-  // JZ NOTE: getQueryArgyment from URL :: http://localhost:9000/monitoring/dashboards/grafana-dashboard-k8s-resources-cluster
   React.useEffect(() => {
     const newBoard = getQueryArgument('dashboard');
     const allVariables = getAllVariables(boards, newBoard, namespace);
