@@ -5,7 +5,7 @@ import { Bar } from '../../graphs';
 
 const Label = ({ metric }) => <>{_.values(metric).join()}</>;
 
-const BarChart: React.FC<BarChartProps> = ({ pollInterval, query }) => (
+const BarChart: React.FC<BarChartProps> = ({ pollInterval, query, pluginProxyAlias }) => (
   <Bar
     barSpacing={5}
     barWidth={8}
@@ -13,6 +13,7 @@ const BarChart: React.FC<BarChartProps> = ({ pollInterval, query }) => (
     LabelComponent={Label}
     noLink={true}
     query={query}
+    pluginProxyAlias={pluginProxyAlias}
   />
 );
 
@@ -20,5 +21,6 @@ type BarChartProps = {
   pollInterval: number;
   query: string;
   namespace?: string;
+  pluginProxyAlias?: string;
 };
 export default BarChart;

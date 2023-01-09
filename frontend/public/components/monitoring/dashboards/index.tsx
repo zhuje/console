@@ -628,7 +628,12 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
             ) : (
               <>
                 {panel.type === 'grafana-piechart-panel' && (
-                  <BarChart pollInterval={pollInterval} query={queries[0]} namespace={namespace} />
+                  <BarChart
+                    pollInterval={pollInterval}
+                    query={queries[0]}
+                    namespace={namespace}
+                    pluginProxyAlias={pluginProxyAlias}
+                  />
                 )}
                 {panel.type === 'graph' && (
                   <Graph
