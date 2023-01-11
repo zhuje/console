@@ -1,10 +1,6 @@
 import classNames from 'classnames';
 import * as _ from 'lodash-es';
-import {
-  PluginDataTypes,
-  PrometheusEndpoint,
-  RedExclamationCircleIcon,
-} from '@console/dynamic-plugin-sdk';
+import { PrometheusEndpoint, RedExclamationCircleIcon } from '@console/dynamic-plugin-sdk';
 import {
   Button,
   Label,
@@ -540,21 +536,40 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   // '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
   // /api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>
 
-  let pluginProxyAlias;
-  if (panel.datasource?.type && panel.datasource?.pluginProxyAlias) {
-    const dataType = panel.datasource.type.trim().toLowerCase();
-    const pluginActive = window.SERVER_FLAGS.consolePlugins.includes(
-      'dashboards-datasource-plugin',
-    );
+  // JZ TODO: Delete
+  const pluginProxyAlias = '';
 
-    if (pluginActive && PluginDataTypes.includes(dataType)) {
-      // JZ TODO: not sure what I should be passing to GraphComponent if enum Prometheus.TEST_PROXY contains url
-      // What does panel.datasource.pluginProxyAlias suppose to say? `backend`
-      pluginProxyAlias = panel.datasource.pluginProxyAlias.trim().toLowerCase();
+  const pluginBasePath = '/api/proxy/plugin/dashboards-datasource-plugin/backend';
+  // if (panel.datasource?.type && panel.datasource?.pluginProxyAlias) {
+  //   const dataType = panel.datasource.type.trim().toLowerCase();
+  // JZ NOTES: 1/9/23 Refactor for extensibility of plugin
+  // // UID = datasourceID in plugin
+  // const isDataSource = (e: Extension): e is DataSource => {
+  //   return e.type === 'console.datasource';
+  // };
+  // // [pluginExtensionFx1, pluginExtensionFx2, ]
+  // const dataSources = useExtensions<DataSource>(isDataSource)
 
-      // JZ TODO: create a warning that plugin configuration not right
-    }
-  }
+  // // const extensionFx =
+  // // for d in data
+  // // if (d.properties.datsource == panel.datasource.uid) return extensionFx
+
+  // // const url = extensionFx();
+  // // extensionFx --> switch(datasource.plyginProxyAlias -- loki, prometheus, etc. )
+  // // <SingleStat {url: url}>
+
+  // // JZ TODO: !!! fix the components to assume you already have the URL
+
+  // JZ TODO: change this into a function to generalize the plugin/ no hardcoding
+  // get PrometheusURL and pass it into the component -- byPass getPrometheusURL()
+  // const pluginActive = window.SERVER_FLAGS.consolePlugins.includes(
+  //   'dashboards-datasource-plugin',
+  // );
+
+  // if (pluginActive && PluginDataTypes.includes(dataType)) {
+  //   pluginProxyAlias = panel.datasource.pluginProxyAlias.trim().toLowerCase();
+  // }
+  // }
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -654,7 +669,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
-                    pluginProxyAlias={pluginProxyAlias}
+                    pluginBasePath={pluginBasePath}
+                    dataSourceType={panel.datasource.type}
                   />
                 )}
                 {panel.type === 'table' && (

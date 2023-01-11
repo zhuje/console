@@ -21,7 +21,7 @@ const getRangeVectorSearchParams = (
   return params;
 };
 
-const getSearchParams = ({
+export const getSearchParams = ({
   endpoint,
   endTime,
   timespan,
@@ -53,6 +53,18 @@ export const getPrometheusURL = (
     return `${DASHBOARD_PLUGIN_BASE_PATH}/${pluginProxyAlias}/${endpoint}?${params.toString()}`;
   }
   return `${basePath}/${props.endpoint}?${params.toString()}`;
+};
+
+export const getPluginURL = (props, pluginBasePath, dataSourceType): string => {
+  switch (dataSourceType) {
+    case 'prometheus': {
+      const params = getSearchParams(props);
+      const endpoint = props.endpoint.substring(props.endpoint.lastIndexOf('/') + 1);
+      return `${pluginBasePath}/${endpoint}?${params.toString()}`;
+    }
+    default:
+      return '';
+  }
 };
 
 // # getPrometheusURL

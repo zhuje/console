@@ -7,7 +7,7 @@ import ErrorAlert from '@console/shared/src/components/alerts/error';
 
 import { formatNumber } from '../format';
 import { Panel } from './types';
-import { getPrometheusURL } from '../../graphs/helpers';
+import { getPluginURL, getPrometheusURL } from '../../graphs/helpers';
 import { LoadingInline, usePoll, useSafeFetch } from '../../utils';
 
 const colorMap = {
@@ -60,7 +60,8 @@ const SingleStat: React.FC<Props> = ({
   pollInterval,
   query,
   namespace,
-  pluginProxyAlias,
+  pluginBasePath,
+  dataSourceType,
 }) => {
   const {
     decimals,
@@ -81,20 +82,21 @@ const SingleStat: React.FC<Props> = ({
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
   const defaultURL = getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace });
+
   const [url, setURL] = React.useState<string>(defaultURL);
   React.useEffect(() => {
-    if (pluginProxyAlias) {
+    if (pluginBasePath) {
       setURL(
-        getPrometheusURL(
+        getPluginURL(
           { endpoint: PrometheusEndpoint.QUERY, query, namespace },
-          '',
-          pluginProxyAlias,
+          pluginBasePath,
+          dataSourceType,
         ),
       );
     }
-  }, [namespace, pluginProxyAlias, query]);
+  }, [dataSourceType, namespace, pluginBasePath, query]);
 
-  const tick = () =>
+  const fetchPrometheus = () => {
     safeFetch(url)
       .then((response: PrometheusResponse) => {
         setError(undefined);
@@ -108,7 +110,18 @@ const SingleStat: React.FC<Props> = ({
           setValue(undefined);
         }
       });
+  };
 
+  const getTick = () => {
+    switch (dataSourceType) {
+      case 'prometheus':
+        return fetchPrometheus;
+      default:
+        return fetchPrometheus;
+    }
+  };
+
+  const tick = getTick();
   usePoll(tick, pollInterval, query);
 
   const filteredVMs = valueMaps?.filter((vm) => vm.op === '=');
@@ -148,7 +161,8 @@ type Props = {
   pollInterval: number;
   query: string;
   namespace?: string;
-  pluginProxyAlias?: string;
+  pluginBasePath?: string;
+  dataSourceType?: string;
 };
 
 export default SingleStat;
