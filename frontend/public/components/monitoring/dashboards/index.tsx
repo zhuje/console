@@ -679,7 +679,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     queries={queries}
                     namespace={namespace}
-                    pluginProxyAlias={pluginProxyAlias}
+                    pluginBasePath={pluginBasePath}
+                    dataSourceType={panel.datasource.type}
                   />
                 )}
               </>

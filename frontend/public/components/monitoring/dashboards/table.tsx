@@ -22,7 +22,7 @@ import ErrorAlert from '@console/shared/src/components/alerts/error';
 
 import { formatNumber } from '../format';
 import { ColumnStyle, Panel } from './types';
-import { getPrometheusURL } from '../../graphs/helpers';
+import { getPluginURL, getPrometheusURL } from '../../graphs/helpers';
 import { usePoll, useSafeFetch } from '../../utils';
 import TablePagination from '../table-pagination';
 
@@ -63,7 +63,14 @@ const perPageOptions: PerPageOptions[] = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
 }));
 
-const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, pluginProxyAlias }) => {
+const Table: React.FC<Props> = ({
+  panel,
+  pollInterval,
+  queries,
+  namespace,
+  pluginBasePath,
+  dataSourceType,
+}) => {
   const [error, setError] = React.useState();
   const [isLoading, setLoading] = React.useState(true);
   const [data, setData] = React.useState();
@@ -76,19 +83,22 @@ const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, plugi
 
   const { t } = useTranslation();
 
-  const url = (q) => {
-    if (pluginProxyAlias) {
-      return getPrometheusURL(
-        { endpoint: PrometheusEndpoint.QUERY, query: q, namespace },
-        '',
-        pluginProxyAlias,
-      );
+  const getURL = (q) => {
+    switch (dataSourceType) {
+      case 'prometheus': {
+        return getPluginURL(
+          { endpoint: PrometheusEndpoint.QUERY, query: q, namespace },
+          pluginBasePath,
+          dataSourceType,
+        );
+      }
+      default:
+        return getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query: q, namespace });
     }
-    return getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query: q, namespace });
   };
 
   const tick = () => {
-    Promise.all(queries.map((q) => safeFetch(url(q))))
+    Promise.all(queries.map((q) => safeFetch(getURL(q))))
       .then((responses: PrometheusResponse[]) => {
         setError(undefined);
         setLoading(false);
@@ -214,7 +224,8 @@ type Props = {
   pollInterval: number;
   queries: string[];
   namespace?: string;
-  pluginProxyAlias?: string;
+  pluginBasePath?: string;
+  dataSourceType?: string;
 };
 
 export default Table;

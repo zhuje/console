@@ -85,7 +85,7 @@ const SingleStat: React.FC<Props> = ({
 
   const [url, setURL] = React.useState<string>(defaultURL);
   React.useEffect(() => {
-    if (pluginBasePath) {
+    if (pluginBasePath && dataSourceType) {
       setURL(
         getPluginURL(
           { endpoint: PrometheusEndpoint.QUERY, query, namespace },

@@ -36,26 +36,22 @@ export const getSearchParams = ({
   return searchParams;
 };
 
-const DASHBOARD_PLUGIN_BASE_PATH = '/api/proxy/plugin/dashboards-datasource-plugin';
-
 export const getPrometheusURL = (
   props: PrometheusURLProps,
   basePath: string = props.namespace ? PROMETHEUS_TENANCY_BASE_PATH : PROMETHEUS_BASE_PATH,
-  pluginProxyAlias?: string,
 ): string => {
   if (props.endpoint !== PrometheusEndpoint.RULES && !props.query) {
     return '';
   }
   const params = getSearchParams(props);
-
-  if (pluginProxyAlias) {
-    const endpoint = props.endpoint.substring(props.endpoint.lastIndexOf('/') + 1);
-    return `${DASHBOARD_PLUGIN_BASE_PATH}/${pluginProxyAlias}/${endpoint}?${params.toString()}`;
-  }
   return `${basePath}/${props.endpoint}?${params.toString()}`;
 };
 
-export const getPluginURL = (props, pluginBasePath, dataSourceType): string => {
+export const getPluginURL = (
+  props: URLProps,
+  pluginBasePath: string,
+  dataSourceType: string,
+): string => {
   switch (dataSourceType) {
     case 'prometheus': {
       const params = getSearchParams(props);
@@ -105,3 +101,5 @@ type PrometheusURLProps = {
   timespan?: number;
   pluginProxyAlias?: string;
 };
+
+type URLProps = PrometheusURLProps;
