@@ -1,5 +1,5 @@
 import { useURLPoll } from '../utils/url-poll-hook';
-import { getPrometheusURL } from './helpers';
+import { getPluginURL, getPrometheusURL } from './helpers';
 import { DEFAULT_PROMETHEUS_SAMPLES, DEFAULT_PROMETHEUS_TIMESPAN, PrometheusResponse } from '.';
 import { PrometheusPollProps } from '@console/dynamic-plugin-sdk/src/extensions/console-types';
 
@@ -14,10 +14,21 @@ export const usePrometheusPoll: UsePrometheusPoll = ({
   samples = DEFAULT_PROMETHEUS_SAMPLES,
   timeout,
   timespan = DEFAULT_PROMETHEUS_TIMESPAN,
-  pluginProxyAlias,
+  pluginBasePath,
+  dataSourceType,
 }) => {
   const promtheusURLProps = { endpoint, endTime, namespace, query, samples, timeout, timespan };
-  const url = getPrometheusURL(promtheusURLProps, '', pluginProxyAlias);
+
+  let url: string;
+  switch (dataSourceType) {
+    case 'prometheus': {
+      url = getPluginURL(promtheusURLProps, pluginBasePath, dataSourceType);
+      break;
+    }
+    default:
+      url = getPrometheusURL(promtheusURLProps);
+      break;
+  }
 
   return useURLPoll<PrometheusResponse>(url, delay, query, timespan);
 };

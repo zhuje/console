@@ -164,7 +164,9 @@ export type PrometheusPollProps = {
   /** A vector-query search parameter */
   timespan?: number;
   /** If a plugin is present, it allows polling from custom prometheus datasources */
-  pluginProxyAlias?: string;
+  pluginBasePath?: string;
+  /** Datasource defined by a custom dashboard definition */
+  dataSourceType?: string;
 };
 
 export type UsePrometheusPoll = (

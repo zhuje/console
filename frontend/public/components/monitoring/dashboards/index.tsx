@@ -537,7 +537,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   // /api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>
 
   // JZ TODO: Delete
-  const pluginProxyAlias = '';
 
   const pluginBasePath = '/api/proxy/plugin/dashboards-datasource-plugin/backend';
   // if (panel.datasource?.type && panel.datasource?.pluginProxyAlias) {
@@ -647,7 +646,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
-                    pluginProxyAlias={pluginProxyAlias}
+                    pluginBasePath={pluginBasePath}
+                    dataSourceType={panel.datasource.type}
                   />
                 )}
                 {panel.type === 'graph' && (

@@ -94,17 +94,19 @@ export const Bar: React.FC<BarProps> = ({
   query,
   theme,
   title,
-  pluginProxyAlias,
+  pluginBasePath,
+  dataSourceType,
 }) => {
   const [response, , loading] = usePrometheusPoll({
     delay,
     endpoint: PrometheusEndpoint.QUERY,
     namespace,
     query,
-    pluginProxyAlias,
+    pluginBasePath,
+    dataSourceType,
   });
-  const data = getInstantVectorStats(response, metric, humanize);
 
+  const data = getInstantVectorStats(response, metric, humanize);
   return (
     <BarChart
       barSpacing={barSpacing}
@@ -151,5 +153,6 @@ type BarProps = {
   theme?: any; // TODO figure out the best way to import VictoryThemeDefinition
   title?: string;
   titleClassName: string;
-  pluginProxyAlias?: string;
+  pluginBasePath?: string;
+  dataSourceType?: string;
 };
