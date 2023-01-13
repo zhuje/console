@@ -660,7 +660,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     units={panel.yaxes?.[0]?.format}
                     onZoomHandle={handleZoom}
                     namespace={namespace}
-                    pluginProxyAlias={pluginProxyAlias}
+                    pluginBasePath={pluginBasePath}
+                    dataSourceType={panel.datasource.type}
                   />
                 )}
                 {(panel.type === 'singlestat' || panel.type === 'gauge') && (

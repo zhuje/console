@@ -17,7 +17,8 @@ type Props = {
   units: string;
   onZoomHandle?: (timeRange: number, endTime: number) => void;
   namespace?: string;
-  pluginProxyAlias?: string;
+  pluginBasePath;
+  dataSourceType;
 };
 
 const Graph: React.FC<Props> = ({
@@ -29,7 +30,8 @@ const Graph: React.FC<Props> = ({
   units,
   onZoomHandle,
   namespace,
-  pluginProxyAlias,
+  pluginBasePath,
+  dataSourceType,
 }) => {
   const dispatch = useDispatch();
   const activePerspective = getActivePerspective(namespace);
@@ -63,7 +65,8 @@ const Graph: React.FC<Props> = ({
       timespan={timespan}
       units={units}
       namespace={namespace}
-      pluginProxyAlias={pluginProxyAlias}
+      pluginBasePath={pluginBasePath}
+      dataSourceType={dataSourceType}
     />
   );
 };

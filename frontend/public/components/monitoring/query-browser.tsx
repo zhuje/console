@@ -54,7 +54,7 @@ import {
 } from '../../actions/observe';
 import { RootState } from '../../redux';
 import { GraphEmpty } from '../graphs/graph-empty';
-import { getPrometheusURL } from '../graphs/helpers';
+import { getPluginURL, getPrometheusURL } from '../graphs/helpers';
 import { humanizeNumberSI, LoadingInline, usePoll, useRefWidth, useSafeFetch } from '../utils';
 import {
   dateFormatterNoYear,
@@ -643,6 +643,7 @@ const getMaxSamplesForSpan = (span: number) =>
   _.clamp(Math.round(span / minStep), minSamples, maxSamples);
 
 const QueryBrowser_: React.FC<QueryBrowserProps> = ({
+  dataSourceType,
   defaultSamples,
   defaultTimespan = parsePrometheusDuration('30m'),
   disabledSeries,
@@ -656,7 +657,7 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
   namespace,
   onZoom,
   pollInterval,
-  pluginProxyAlias,
+  pluginBasePath,
   queries,
   showLegend,
   showStackedControl = false,
@@ -745,8 +746,8 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
         timeout: '60s',
         timespan: span,
       };
-      if (pluginProxyAlias) {
-        return getPrometheusURL(prometheusURLProps, '', pluginProxyAlias);
+      if (pluginBasePath && dataSourceType) {
+        return getPluginURL(prometheusURLProps, pluginBasePath, dataSourceType);
       }
       return getPrometheusURL(prometheusURLProps);
     };
@@ -1029,6 +1030,7 @@ type GraphOnZoom = (from: number, to: number) => void;
 type ZoomableGraphProps = GraphProps & { onZoom: GraphOnZoom };
 
 export type QueryBrowserProps = {
+  dataSourceType?: string;
   defaultSamples?: number;
   defaultTimespan?: number;
   disabledSeries?: PrometheusLabels[][];
@@ -1042,7 +1044,7 @@ export type QueryBrowserProps = {
   namespace?: string;
   onZoom?: GraphOnZoom;
   pollInterval?: number;
-  pluginProxyAlias?: string;
+  pluginBasePath?: string;
   queries: string[];
   showLegend?: boolean;
   showStackedControl?: boolean;
