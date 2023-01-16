@@ -27,7 +27,7 @@ export const getSearchParams = ({
   timespan,
   samples,
   ...params
-}: PrometheusURLProps): URLSearchParams => {
+}: URLProps): URLSearchParams => {
   const searchParams =
     endpoint === PrometheusEndpoint.QUERY_RANGE
       ? getRangeVectorSearchParams(endTime, samples, timespan)
@@ -95,11 +95,19 @@ type PrometheusURLProps = {
   endTime?: number;
   namespace?: string;
   query?: string;
-  proxy?: boolean;
   samples?: number;
   timeout?: string;
   timespan?: number;
-  pluginProxyAlias?: string;
 };
 
-type URLProps = PrometheusURLProps;
+type pluginURLProps = {
+  endpoint: string | PrometheusEndpoint;
+  endTime?: number;
+  namespace?: string;
+  query?: string;
+  samples?: number;
+  timeout?: string;
+  timespan?: number;
+};
+
+type URLProps = PrometheusURLProps | pluginURLProps;
