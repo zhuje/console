@@ -8,7 +8,7 @@ import {
 } from '@patternfly/react-charts';
 
 import { useRefWidth } from '../utils/ref-width-hook';
-import { usePoll } from './poll-hook';
+import { usePrometheusPoll } from './prometheus-poll-hook';
 import { PrometheusEndpoint } from './helpers';
 import { PrometheusGraph, PrometheusGraphLink } from './prometheus-graph';
 import { barTheme } from './themes';
@@ -95,40 +95,14 @@ export const Bar: React.FC<BarProps> = ({
   theme,
   title,
   pluginBasePath,
-  dataSourceType,
 }) => {
-  const [response, , loading] = usePoll({
+  const [response, , loading] = usePrometheusPoll({
     delay,
     endpoint: PrometheusEndpoint.QUERY,
     namespace,
     query,
     pluginBasePath,
-    dataSourceType,
   });
-
-  // const [response, , loading] = () :[any,unknown,boolean] =>  {
-  //   switch(dataSourceType){
-  //     case 'prometheus': {
-  //       const promtheusURLProps = {
-  //         delay,
-  //         endpoint: PrometheusEndpoint.QUERY,
-  //         namespace,
-  //         query,
-  //         samples: DEFAULT_PROMETHEUS_SAMPLES,
-  //         timespan: DEFAULT_PROMETHEUS_TIMESPAN
-  //       }
-  //       return useURLPoll<[any,unknown,boolean]>(getPluginURL(promtheusURLProps, pluginBasePath, dataSourceType), delay, query);
-  //     }
-  //     default: {
-  //       return usePrometheusPoll({
-  //         delay,
-  //         endpoint: PrometheusEndpoint.QUERY,
-  //         namespace,
-  //         query,
-  //       });
-  //     }
-  //   }
-  // }
 
   const data = getInstantVectorStats(response, metric, humanize);
   return (
@@ -178,5 +152,4 @@ type BarProps = {
   title?: string;
   titleClassName: string;
   pluginBasePath?: string;
-  dataSourceType?: string;
 };

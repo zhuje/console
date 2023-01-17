@@ -22,7 +22,7 @@ import ErrorAlert from '@console/shared/src/components/alerts/error';
 
 import { formatNumber } from '../format';
 import { ColumnStyle, Panel } from './types';
-import { getPluginURL, getPrometheusURL } from '../../graphs/helpers';
+import { getPrometheusURL } from '../../graphs/helpers';
 import { usePoll, useSafeFetch } from '../../utils';
 import TablePagination from '../table-pagination';
 
@@ -63,14 +63,7 @@ const perPageOptions: PerPageOptions[] = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
 }));
 
-const Table: React.FC<Props> = ({
-  panel,
-  pollInterval,
-  queries,
-  namespace,
-  pluginBasePath,
-  dataSourceType,
-}) => {
+const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, pluginBasePath }) => {
   const [error, setError] = React.useState();
   const [isLoading, setLoading] = React.useState(true);
   const [data, setData] = React.useState();
@@ -83,18 +76,9 @@ const Table: React.FC<Props> = ({
 
   const { t } = useTranslation();
 
-  const getURL = (q) => {
-    switch (dataSourceType) {
-      case 'prometheus': {
-        return getPluginURL(
-          { endpoint: PrometheusEndpoint.QUERY, query: q, namespace },
-          pluginBasePath,
-          dataSourceType,
-        );
-      }
-      default:
-        return getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query: q, namespace });
-    }
+  const getURL = (query) => {
+    const prometheusURLProps = { endpoint: PrometheusEndpoint.QUERY, query, namespace };
+    return getPrometheusURL(prometheusURLProps, pluginBasePath);
   };
 
   const tick = () => {
@@ -225,7 +209,6 @@ type Props = {
   queries: string[];
   namespace?: string;
   pluginBasePath?: string;
-  dataSourceType?: string;
 };
 
 export default Table;

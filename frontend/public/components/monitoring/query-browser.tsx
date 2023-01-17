@@ -54,7 +54,7 @@ import {
 } from '../../actions/observe';
 import { RootState } from '../../redux';
 import { GraphEmpty } from '../graphs/graph-empty';
-import { getPluginURL, getPrometheusURL } from '../graphs/helpers';
+import { getPrometheusURL } from '../graphs/helpers';
 import { humanizeNumberSI, LoadingInline, usePoll, useRefWidth, useSafeFetch } from '../utils';
 import {
   dateFormatterNoYear,
@@ -643,7 +643,6 @@ const getMaxSamplesForSpan = (span: number) =>
   _.clamp(Math.round(span / minStep), minSamples, maxSamples);
 
 const QueryBrowser_: React.FC<QueryBrowserProps> = ({
-  dataSourceType,
   defaultSamples,
   defaultTimespan = parsePrometheusDuration('30m'),
   disabledSeries,
@@ -736,7 +735,7 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
     // Define this once for all queries so that they have exactly the same time range and X values
     const now = Date.now();
 
-    const prometheusURL = (query) => {
+    const getURL = (query) => {
       const prometheusURLProps = {
         endpoint: PrometheusEndpoint.QUERY_RANGE,
         endTime: endTime || now,
@@ -746,14 +745,11 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
         timeout: '60s',
         timespan: span,
       };
-      if (pluginBasePath && dataSourceType) {
-        return getPluginURL(prometheusURLProps, pluginBasePath, dataSourceType);
-      }
-      return getPrometheusURL(prometheusURLProps);
+      return getPrometheusURL(prometheusURLProps, pluginBasePath);
     };
 
     const allPromises = _.map(queries, (query) =>
-      _.isEmpty(query) ? Promise.resolve() : safeFetch(prometheusURL(query)),
+      _.isEmpty(query) ? Promise.resolve() : safeFetch(getURL(query)),
     );
 
     return Promise.all(allPromises)
@@ -1030,7 +1026,6 @@ type GraphOnZoom = (from: number, to: number) => void;
 type ZoomableGraphProps = GraphProps & { onZoom: GraphOnZoom };
 
 export type QueryBrowserProps = {
-  dataSourceType?: string;
   defaultSamples?: number;
   defaultTimespan?: number;
   disabledSeries?: PrometheusLabels[][];

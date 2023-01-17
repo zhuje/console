@@ -244,6 +244,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       // be converted to use that instead
       const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
 
+      // JZ TODO: Update this to handle Proxy
       const url = getPrometheusURL({
         endpoint: PrometheusEndpoint.QUERY_RANGE,
         query: prometheusQuery,
@@ -539,6 +540,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   // JZ TODO: Delete
 
   const pluginBasePath = '/api/proxy/plugin/dashboards-datasource-plugin/backend';
+
   // if (panel.datasource?.type && panel.datasource?.pluginProxyAlias) {
   //   const dataType = panel.datasource.type.trim().toLowerCase();
   // JZ NOTES: 1/9/23 Refactor for extensibility of plugin
@@ -569,6 +571,9 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   //   pluginProxyAlias = panel.datasource.pluginProxyAlias.trim().toLowerCase();
   // }
   // }
+
+  // JZ TODO: Check where to get the variables, which query to execute is
+  // then change the basePath to the plugin
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -647,7 +652,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     query={queries[0]}
                     namespace={namespace}
                     pluginBasePath={pluginBasePath}
-                    dataSourceType={panel.datasource.type}
                   />
                 )}
                 {panel.type === 'graph' && (
@@ -661,7 +665,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     onZoomHandle={handleZoom}
                     namespace={namespace}
                     pluginBasePath={pluginBasePath}
-                    dataSourceType={panel.datasource.type}
                   />
                 )}
                 {(panel.type === 'singlestat' || panel.type === 'gauge') && (
@@ -671,7 +674,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     query={queries[0]}
                     namespace={namespace}
                     pluginBasePath={pluginBasePath}
-                    dataSourceType={panel.datasource.type}
                   />
                 )}
                 {panel.type === 'table' && (
@@ -681,7 +683,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     queries={queries}
                     namespace={namespace}
                     pluginBasePath={pluginBasePath}
-                    dataSourceType={panel.datasource.type}
                   />
                 )}
               </>

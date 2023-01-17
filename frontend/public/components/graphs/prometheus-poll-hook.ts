@@ -14,8 +14,12 @@ export const usePrometheusPoll: UsePrometheusPoll = ({
   samples = DEFAULT_PROMETHEUS_SAMPLES,
   timeout,
   timespan = DEFAULT_PROMETHEUS_TIMESPAN,
+  pluginBasePath,
 }) => {
-  const url = getPrometheusURL({ endpoint, endTime, namespace, query, samples, timeout, timespan });
+  const url = getPrometheusURL(
+    { endpoint, endTime, namespace, query, samples, timeout, timespan },
+    pluginBasePath,
+  );
 
   return useURLPoll<PrometheusResponse>(url, delay, query, timespan);
 };

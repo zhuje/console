@@ -163,29 +163,8 @@ export type PrometheusPollProps = {
   samples?: number;
   /** A vector-query search parameter */
   timespan?: number;
-};
-
-export type PollProps = {
-  /** Delay between polling requests */
-  delay?: number;
-  /** Well-defined API endpoints. Additional definitions should be added to accomadate different data sources in the future. */
-  endpoint: PrometheusEndpoint;
-  /** The current namespace */
-  namespace?: string;
-  /** Prometheus query, polling is skipped when empty or undefined */
-  query?: string;
-  /** A search parameter */
-  timeout?: string;
-  /** A vector-query search parameter */
-  endTime?: number;
-  /** A vector-query search parameter */
-  samples?: number;
-  /** A vector-query search parameter */
-  timespan?: number;
-  /** Plugin proxy base path  */
+  /** The base path of a plugin; it allows fetching from a different data source. */
   pluginBasePath?: string;
-  /** Data type being polled (e.g. promtheus) */
-  dataSourceType?: string;
 };
 
 export type UsePrometheusPoll = (

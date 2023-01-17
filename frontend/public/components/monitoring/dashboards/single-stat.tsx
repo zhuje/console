@@ -7,7 +7,7 @@ import ErrorAlert from '@console/shared/src/components/alerts/error';
 
 import { formatNumber } from '../format';
 import { Panel } from './types';
-import { getPluginURL, getPrometheusURL } from '../../graphs/helpers';
+import { getPrometheusURL } from '../../graphs/helpers';
 import { LoadingInline, usePoll, useSafeFetch } from '../../utils';
 
 const colorMap = {
@@ -55,14 +55,7 @@ const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Bullseye className="monitoring-dashboards__single-stat">{children}</Bullseye>
 );
 
-const SingleStat: React.FC<Props> = ({
-  panel,
-  pollInterval,
-  query,
-  namespace,
-  pluginBasePath,
-  dataSourceType,
-}) => {
+const SingleStat: React.FC<Props> = ({ panel, pollInterval, query, namespace, pluginBasePath }) => {
   const {
     decimals,
     format,
@@ -81,23 +74,13 @@ const SingleStat: React.FC<Props> = ({
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
-  const defaultURL = getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace });
+  const getURL = () => {
+    const prometheusURLProps = { endpoint: PrometheusEndpoint.QUERY, query, namespace };
+    return getPrometheusURL(prometheusURLProps, pluginBasePath);
+  };
 
-  const [url, setURL] = React.useState<string>(defaultURL);
-  React.useEffect(() => {
-    if (pluginBasePath && dataSourceType) {
-      setURL(
-        getPluginURL(
-          { endpoint: PrometheusEndpoint.QUERY, query, namespace },
-          pluginBasePath,
-          dataSourceType,
-        ),
-      );
-    }
-  }, [dataSourceType, namespace, pluginBasePath, query]);
-
-  const fetchPrometheus = () => {
-    safeFetch(url)
+  const tick = () =>
+    safeFetch(getURL())
       .then((response: PrometheusResponse) => {
         setError(undefined);
         setIsLoading(false);
@@ -110,18 +93,7 @@ const SingleStat: React.FC<Props> = ({
           setValue(undefined);
         }
       });
-  };
 
-  const getTick = () => {
-    switch (dataSourceType) {
-      case 'prometheus':
-        return fetchPrometheus;
-      default:
-        return fetchPrometheus;
-    }
-  };
-
-  const tick = getTick();
   usePoll(tick, pollInterval, query);
 
   const filteredVMs = valueMaps?.filter((vm) => vm.op === '=');
@@ -162,7 +134,6 @@ type Props = {
   query: string;
   namespace?: string;
   pluginBasePath?: string;
-  dataSourceType?: string;
 };
 
 export default SingleStat;

@@ -44,23 +44,11 @@ export const getPrometheusURL = (
     return '';
   }
   const params = getSearchParams(props);
-  return `${basePath}/${props.endpoint}?${params.toString()}`;
-};
-
-export const getPluginURL = (
-  props: URLProps,
-  pluginBasePath: string,
-  dataSourceType: string,
-): string => {
-  switch (dataSourceType) {
-    case 'prometheus': {
-      const params = getSearchParams(props);
-      const endpoint = props.endpoint.substring(props.endpoint.lastIndexOf('/') + 1);
-      return `${pluginBasePath}/${endpoint}?${params.toString()}`;
-    }
-    default:
-      return '';
-  }
+  const endpoint =
+    basePath === PROMETHEUS_TENANCY_BASE_PATH || basePath === PROMETHEUS_BASE_PATH
+      ? props.endpoint
+      : props.endpoint.substring(props.endpoint.lastIndexOf('/') + 1);
+  return `${basePath}/${endpoint}?${params.toString()}`;
 };
 
 // # getPrometheusURL
