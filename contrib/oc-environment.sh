@@ -58,5 +58,5 @@ BRIDGE_PLUGINS="dashboards-datasource-plugin=http://localhost:9001"
 export BRIDGE_PLUGINS
 PROXY_ENDPOINT="http://localhost:9000/api/prometheus/api/v1/"
 export PROXY_ENDPOINT
-BRIDGE_PLUGIN_PROXY="{\"services\": [{\"consoleAPIPath\": \"/api/proxy/plugin/dashboards-datasource-plugin/backend/\", \"authorize\": true, \"endpoint\": \"${PROXY_ENDPOINT}\"}]}"
+BRIDGE_PLUGIN_PROXY="{\"services\": [{\"consoleAPIPath\": \"/api/proxy/plugin/dashboards-datasource-plugin/backend/api/v1/\", \"authorize\": true, \"endpoint\": \"${PROXY_ENDPOINT}\"}]}"
 export BRIDGE_PLUGIN_PROXY
