@@ -10,6 +10,8 @@ import { Panel } from './types';
 import { getPrometheusURL } from '../../graphs/helpers';
 import { LoadingInline, usePoll, useSafeFetch } from '../../utils';
 
+import { CustomDataSource } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 const colorMap = {
   'super-light-blue': 'blue-100',
   'light-blue': 'blue-200',
@@ -55,7 +57,13 @@ const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Bullseye className="monitoring-dashboards__single-stat">{children}</Bullseye>
 );
 
-const SingleStat: React.FC<Props> = ({ panel, pollInterval, query, namespace, pluginBasePath }) => {
+const SingleStat: React.FC<Props> = ({
+  panel,
+  pollInterval,
+  query,
+  namespace,
+  customDataSource,
+}) => {
   const {
     decimals,
     format,
@@ -76,7 +84,9 @@ const SingleStat: React.FC<Props> = ({ panel, pollInterval, query, namespace, pl
 
   const getURL = () => {
     const prometheusURLProps = { endpoint: PrometheusEndpoint.QUERY, query, namespace };
-    return getPrometheusURL(prometheusURLProps, pluginBasePath);
+    return customDataSource
+      ? getPrometheusURL(prometheusURLProps, customDataSource.basePath)
+      : getPrometheusURL(prometheusURLProps);
   };
 
   const tick = () =>
@@ -133,7 +143,7 @@ type Props = {
   pollInterval: number;
   query: string;
   namespace?: string;
-  pluginBasePath?: string;
+  customDataSource?: CustomDataSource;
 };
 
 export default SingleStat;

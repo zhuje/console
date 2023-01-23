@@ -44,10 +44,13 @@ export const getPrometheusURL = (
     return '';
   }
   const params = getSearchParams(props);
+
+  // JZ TODO: refactor to REMOVE -- its the plugin's responsibility to send the proper url
   const endpoint =
     basePath === PROMETHEUS_TENANCY_BASE_PATH || basePath === PROMETHEUS_BASE_PATH
       ? props.endpoint
       : props.endpoint.substring(props.endpoint.lastIndexOf('/') + 1);
+
   return `${basePath}/${endpoint}?${params.toString()}`;
 };
 

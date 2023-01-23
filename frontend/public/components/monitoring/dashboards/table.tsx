@@ -26,6 +26,8 @@ import { getPrometheusURL } from '../../graphs/helpers';
 import { usePoll, useSafeFetch } from '../../utils';
 import TablePagination from '../table-pagination';
 
+import { CustomDataSource } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 type AugmentedColumnStyle = ColumnStyle & {
   className?: string;
 };
@@ -63,7 +65,7 @@ const perPageOptions: PerPageOptions[] = [5, 10, 20, 50, 100].map((n) => ({
   value: n,
 }));
 
-const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, pluginBasePath }) => {
+const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, customDataSource }) => {
   const [error, setError] = React.useState();
   const [isLoading, setLoading] = React.useState(true);
   const [data, setData] = React.useState();
@@ -78,7 +80,9 @@ const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, plugi
 
   const getURL = (query) => {
     const prometheusURLProps = { endpoint: PrometheusEndpoint.QUERY, query, namespace };
-    return getPrometheusURL(prometheusURLProps, pluginBasePath);
+    return customDataSource
+      ? getPrometheusURL(prometheusURLProps, customDataSource.basePath)
+      : getPrometheusURL(prometheusURLProps);
   };
 
   const tick = () => {
@@ -208,7 +212,7 @@ type Props = {
   pollInterval: number;
   queries: string[];
   namespace?: string;
-  pluginBasePath?: string;
+  customDataSource?: CustomDataSource;
 };
 
 export default Table;

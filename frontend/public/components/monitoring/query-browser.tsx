@@ -67,6 +67,8 @@ import { useBoolean } from './hooks/useBoolean';
 import { queryBrowserTheme } from './query-browser-theme';
 import { PrometheusAPIError } from './types';
 
+import { CustomDataSource } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 const spans = ['5m', '15m', '30m', '1h', '2h', '6h', '12h', '1d', '2d', '1w', '2w'];
 export const colors = queryBrowserTheme.line.colorScale;
 
@@ -656,7 +658,7 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
   namespace,
   onZoom,
   pollInterval,
-  pluginBasePath,
+  customDataSource,
   queries,
   showLegend,
   showStackedControl = false,
@@ -745,7 +747,9 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
         timeout: '60s',
         timespan: span,
       };
-      return getPrometheusURL(prometheusURLProps, pluginBasePath);
+      return customDataSource
+        ? getPrometheusURL(prometheusURLProps, customDataSource.basePath)
+        : getPrometheusURL(prometheusURLProps);
     };
 
     const allPromises = _.map(queries, (query) =>
@@ -1039,7 +1043,7 @@ export type QueryBrowserProps = {
   namespace?: string;
   onZoom?: GraphOnZoom;
   pollInterval?: number;
-  pluginBasePath?: string;
+  customDataSource?: CustomDataSource;
   queries: string[];
   showLegend?: boolean;
   showStackedControl?: boolean;

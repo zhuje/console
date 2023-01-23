@@ -3,14 +3,11 @@ import * as React from 'react';
 
 import { Bar } from '../../graphs';
 
+import { CustomDataSource } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 const Label = ({ metric }) => <>{_.values(metric).join()}</>;
 
-const BarChart: React.FC<BarChartProps> = ({
-  pollInterval,
-  query,
-  pluginBasePath,
-  dataSourceType,
-}) => (
+const BarChart: React.FC<BarChartProps> = ({ pollInterval, query, customDataSource }) => (
   <Bar
     barSpacing={5}
     barWidth={8}
@@ -18,8 +15,7 @@ const BarChart: React.FC<BarChartProps> = ({
     LabelComponent={Label}
     noLink={true}
     query={query}
-    pluginBasePath={pluginBasePath}
-    dataSourceType={dataSourceType}
+    customDataSource={customDataSource}
   />
 );
 
@@ -27,7 +23,6 @@ type BarChartProps = {
   pollInterval: number;
   query: string;
   namespace?: string;
-  pluginBasePath?: string;
-  dataSourceType?: string;
+  customDataSource?: CustomDataSource;
 };
 export default BarChart;

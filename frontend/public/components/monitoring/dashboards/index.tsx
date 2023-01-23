@@ -70,6 +70,13 @@ import {
   getAllVariables,
 } from './monitoring-dashboard-utils';
 
+import { useExtensions } from '@console/plugin-sdk/src';
+import {
+  isDataSource,
+  DataSource as DataSourceExtension,
+  CustomDataSource,
+} from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
 const isIntervalVariable = (itemKey: string): boolean =>
@@ -538,9 +545,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   // /api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>
 
   // JZ TODO: Delete
-
-  const pluginBasePath = '/api/proxy/plugin/dashboards-datasource-plugin/backend';
-
   // if (panel.datasource?.type && panel.datasource?.pluginProxyAlias) {
   //   const dataType = panel.datasource.type.trim().toLowerCase();
   // JZ NOTES: 1/9/23 Refactor for extensibility of plugin
@@ -559,9 +563,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   // // extensionFx --> switch(datasource.plyginProxyAlias -- loki, prometheus, etc. )
   // // <SingleStat {url: url}>
 
-  // // JZ TODO: !!! fix the components to assume you already have the URL
-
-  // JZ TODO: change this into a function to generalize the plugin/ no hardcoding
+  // JZ TODO: DONE --- change this into a function to generalize the plugin/ no hardcoding
   // get PrometheusURL and pass it into the component -- byPass getPrometheusURL()
   // const pluginActive = window.SERVER_FLAGS.consolePlugins.includes(
   //   'dashboards-datasource-plugin',
@@ -574,6 +576,19 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
 
   // JZ TODO: Check where to get the variables, which query to execute is
   // then change the basePath to the plugin
+
+  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
+  const dataSourceID = panel.datasource?.uid;
+  const dataSources = useExtensions<DataSourceExtension>(isDataSource);
+
+  React.useEffect(() => {
+    if (dataSourceID) {
+      dataSources.forEach(async (dataSource) => {
+        const getDataSource = await dataSource.properties.getDataSource();
+        setCustomDataSource(getDataSource(dataSourceID));
+      });
+    }
+  }, [dataSources, dataSourceID]);
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -651,7 +666,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
-                    pluginBasePath={pluginBasePath}
+                    customDataSource={customDataSource}
                   />
                 )}
                 {panel.type === 'graph' && (
@@ -664,7 +679,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     units={panel.yaxes?.[0]?.format}
                     onZoomHandle={handleZoom}
                     namespace={namespace}
-                    pluginBasePath={pluginBasePath}
+                    customDataSource={customDataSource}
                   />
                 )}
                 {(panel.type === 'singlestat' || panel.type === 'gauge') && (
@@ -673,7 +688,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
-                    pluginBasePath={pluginBasePath}
+                    customDataSource={customDataSource}
                   />
                 )}
                 {panel.type === 'table' && (
@@ -682,7 +697,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     queries={queries}
                     namespace={namespace}
-                    pluginBasePath={pluginBasePath}
+                    customDataSource={customDataSource}
                   />
                 )}
               </>
