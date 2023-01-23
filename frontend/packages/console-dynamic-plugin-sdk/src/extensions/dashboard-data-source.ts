@@ -7,8 +7,7 @@ export type DataSource = ExtensionDeclaration<
     datasourceID: string;
     /** The plugin path. */
     path: string;
-    component: CodeRef<() => string>;
-    /** The extension function returns a object that facilitates fetching from a custom data source within Observe > Dashboard. */
+    /** Returns extension functions that provide custom data source URLs. */
     getDataSource: CodeRef<(dataSourceID: string) => CustomDataSource>;
   }
 >;

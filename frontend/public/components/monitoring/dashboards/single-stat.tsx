@@ -82,15 +82,13 @@ const SingleStat: React.FC<Props> = ({
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
-  const getURL = () => {
-    const prometheusURLProps = { endpoint: PrometheusEndpoint.QUERY, query, namespace };
-    return customDataSource
-      ? getPrometheusURL(prometheusURLProps, customDataSource.basePath)
-      : getPrometheusURL(prometheusURLProps);
-  };
-
   const tick = () =>
-    safeFetch(getURL())
+    safeFetch(
+      getPrometheusURL(
+        { endpoint: PrometheusEndpoint.QUERY, query, namespace },
+        customDataSource?.basePath,
+      ),
+    )
       .then((response: PrometheusResponse) => {
         setError(undefined);
         setIsLoading(false);

@@ -78,15 +78,17 @@ const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace, custo
 
   const { t } = useTranslation();
 
-  const getURL = (query) => {
-    const prometheusURLProps = { endpoint: PrometheusEndpoint.QUERY, query, namespace };
-    return customDataSource
-      ? getPrometheusURL(prometheusURLProps, customDataSource.basePath)
-      : getPrometheusURL(prometheusURLProps);
-  };
-
   const tick = () => {
-    Promise.all(queries.map((q) => safeFetch(getURL(q))))
+    Promise.all(
+      queries.map((q) =>
+        safeFetch(
+          getPrometheusURL(
+            { endpoint: PrometheusEndpoint.QUERY, query: q, namespace },
+            customDataSource?.basePath,
+          ),
+        ),
+      ),
+    )
       .then((responses: PrometheusResponse[]) => {
         setError(undefined);
         setLoading(false);

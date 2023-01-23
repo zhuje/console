@@ -737,23 +737,23 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
     // Define this once for all queries so that they have exactly the same time range and X values
     const now = Date.now();
 
-    const getURL = (query) => {
-      const prometheusURLProps = {
-        endpoint: PrometheusEndpoint.QUERY_RANGE,
-        endTime: endTime || now,
-        namespace,
-        query,
-        samples,
-        timeout: '60s',
-        timespan: span,
-      };
-      return customDataSource
-        ? getPrometheusURL(prometheusURLProps, customDataSource.basePath)
-        : getPrometheusURL(prometheusURLProps);
-    };
-
     const allPromises = _.map(queries, (query) =>
-      _.isEmpty(query) ? Promise.resolve() : safeFetch(getURL(query)),
+      _.isEmpty(query)
+        ? Promise.resolve()
+        : safeFetch(
+            getPrometheusURL(
+              {
+                endpoint: PrometheusEndpoint.QUERY_RANGE,
+                endTime: endTime || now,
+                namespace,
+                query,
+                samples,
+                timeout: '60s',
+                timespan: span,
+              },
+              customDataSource?.basePath,
+            ),
+          ),
     );
 
     return Promise.all(allPromises)
