@@ -77,6 +77,17 @@ import {
   CustomDataSource,
 } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
 
+// JZ TODO: fix -- can't have useExtension hook. Breaks hook rules.
+// const getCustomDataSource = (dataSourceID: string): CustomDataSource => {
+//   let datasource:CustomDataSource;
+//   const dataSources = useExtensions<DataSourceExtension>(isDataSource);
+//   dataSources.forEach(async (dataSource) => {
+//     const getDataSource = await dataSource.properties.getDataSource();
+//     datasource = getDataSource(dataSourceID);
+//   });
+//   return datasource;
+// }
+
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
 const isIntervalVariable = (itemKey: string): boolean =>
@@ -205,25 +216,6 @@ const VariableOption = ({ itemKey }) =>
     </SelectOption>
   );
 
-// JZ NOTE: Each time the we select a different variable fetch data from Prometheus
-// OU: 110 -- we Need to update `PrometheusEndpoint` so that it doesn't default
-// to the single cluster Prometheus but is able to accept the `pluginProxyAlias` which
-// is configured by the dynamic plugin.
-// ## Allow Panels to load data from different sources
-// ## Each Panel has a datasource, in the configMap. Datasource gets passed :
-// ## configuring the operator > dynamic plugin > dashboard < configMap contains information about how data is displayed on dashboard.
-// panel: {
-//   datasource: {
-//     uid: <string>,
-//     type: <string>, Data source type (e.g. “prometheus”)
-//     pluginProxyAlias: <string>,  Configured by dynamic plugin
-//   }
-// }
-// ## Console backend expoes follwing endpoint inorder to proxy the communication
-// ## between plugin and the service
-// `/api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>`
-// template source: https://github.com/openshift/enhancements/blob/master/enhancements/console/dynamic-plugins.md
-
 const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace }) => {
   const { t } = useTranslation();
   const activePerspective = getActivePerspective(namespace);
@@ -235,8 +227,27 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const variables = useSelector(({ observe }: RootState) =>
     observe.getIn(['dashboards', activePerspective, 'variables']),
   );
+
+  // JZ NOTE: variable.datasource -- pull the dataSource object and pass into getPrometheusURL
   const variable = variables.toJS()[name];
   const query = evaluateTemplate(variable.query, variables, timespan);
+
+  // const dataSourceID = variable?.datasource?.uid;
+  // const customDataSource: CustomDataSource =  dataSourceID ? getCustomDataSource(dataSourceID): undefined;
+
+  //  JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
+  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
+  const dataSourceID = variable?.datasource?.uid;
+  const dataSources = useExtensions<DataSourceExtension>(isDataSource);
+
+  React.useEffect(() => {
+    if (dataSourceID) {
+      dataSources.forEach(async (dataSource) => {
+        const getDataSource = await dataSource.properties.getDataSource();
+        setCustomDataSource(getDataSource(dataSourceID));
+      });
+    }
+  }, [dataSources, dataSourceID]);
 
   const dispatch = useDispatch();
 
@@ -252,14 +263,17 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
 
       // JZ TODO: Update this to handle Proxy
-      const url = getPrometheusURL({
-        endpoint: PrometheusEndpoint.QUERY_RANGE,
-        query: prometheusQuery,
-        samples: DEFAULT_GRAPH_SAMPLES,
-        timeout: '60s',
-        timespan,
-        namespace,
-      });
+      const url = getPrometheusURL(
+        {
+          endpoint: PrometheusEndpoint.QUERY_RANGE,
+          query: prometheusQuery,
+          samples: DEFAULT_GRAPH_SAMPLES,
+          timeout: '60s',
+          timespan,
+          namespace,
+        },
+        customDataSource?.basePath,
+      );
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
 
@@ -276,7 +290,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
           }
         });
     }
-  }, [activePerspective, dispatch, name, namespace, query, safeFetch, timespan]);
+  }, [activePerspective, customDataSource, dispatch, name, namespace, query, safeFetch, timespan]);
 
   React.useEffect(() => {
     if (variable.value && variable.value !== getQueryArgument(name)) {
@@ -518,7 +532,6 @@ const getPanelClassModifier = (panel: Panel): string => {
   }
 };
 
-// JZ NOTE: Card digests the panel and outputs a graph type to render
 const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const namespace = React.useContext(NamespaceContext);
   const activePerspective = getActivePerspective(namespace);
@@ -535,52 +548,12 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
 
-  // JZ NOTE: Data Definition and proxy URL
-  // datasource: {
-  //   uid: <string>
-  //   type: <string>
-  //   pluginProxyAlias: <string>
-  // }
-  // '/api/proxy/plugin/dashboards-datasource-plugin/backend/namespaces/openshift-kube-apiserver/pods?limit=250&cluster=local-cluster';
-  // /api/proxy/plugin/<plugin-name>/<proxy-alias>/<request-path>?<optional-query-parameters>
-
-  // JZ TODO: Delete
-  // if (panel.datasource?.type && panel.datasource?.pluginProxyAlias) {
-  //   const dataType = panel.datasource.type.trim().toLowerCase();
-  // JZ NOTES: 1/9/23 Refactor for extensibility of plugin
-  // // UID = datasourceID in plugin
-  // const isDataSource = (e: Extension): e is DataSource => {
-  //   return e.type === 'console.datasource';
-  // };
-  // // [pluginExtensionFx1, pluginExtensionFx2, ]
-  // const dataSources = useExtensions<DataSource>(isDataSource)
-
-  // // const extensionFx =
-  // // for d in data
-  // // if (d.properties.datsource == panel.datasource.uid) return extensionFx
-
-  // // const url = extensionFx();
-  // // extensionFx --> switch(datasource.plyginProxyAlias -- loki, prometheus, etc. )
-  // // <SingleStat {url: url}>
-
-  // JZ TODO: DONE --- change this into a function to generalize the plugin/ no hardcoding
-  // get PrometheusURL and pass it into the component -- byPass getPrometheusURL()
-  // const pluginActive = window.SERVER_FLAGS.consolePlugins.includes(
-  //   'dashboards-datasource-plugin',
-  // );
-
-  // if (pluginActive && PluginDataTypes.includes(dataType)) {
-  //   pluginProxyAlias = panel.datasource.pluginProxyAlias.trim().toLowerCase();
-  // }
-  // }
-
-  // JZ TODO: Check where to get the variables, which query to execute is
-  // then change the basePath to the plugin
-
+  // JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
   const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
   const dataSourceID = panel.datasource?.uid;
   const dataSources = useExtensions<DataSourceExtension>(isDataSource);
 
+  // JZ NOTE: useResolvedExtension hook ... maybe
   React.useEffect(() => {
     if (dataSourceID) {
       dataSources.forEach(async (dataSource) => {
@@ -589,6 +562,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
       });
     }
   }, [dataSources, dataSourceID]);
+
+  // const customDataSource: CustomDataSource =  panel.datasource?.uid ? getCustomDataSource(panel.datasource.uid): undefined;
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -849,6 +824,10 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [namespace]);
+
+  // JZ TODO: add another parameter for panel.datasource -->
+  // then pass down props MonitoringPage > Board > PanelRows > Cards --> panel.datasource --> extFunc(dataSourceID) --> url to fetch data
+  // panel > datasourceInfo {url: extFx(sourceID)=>url}
 
   // If we don't find any rows, build the rows array based on what we have in `data.panels`
   const rows = React.useMemo(() => {

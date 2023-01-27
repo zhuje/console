@@ -3,10 +3,6 @@ import { Extension, ExtensionDeclaration, CodeRef } from '../types';
 export type DataSource = ExtensionDeclaration<
   'console.datasource',
   {
-    /** The data source identifier. */
-    datasourceID: string;
-    /** The plugin path. */
-    path: string;
     /** Returns extension functions that provide custom data source URLs. */
     getDataSource: CodeRef<(dataSourceID: string) => CustomDataSource>;
   }
