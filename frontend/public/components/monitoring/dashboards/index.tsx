@@ -77,17 +77,6 @@ import {
   CustomDataSource,
 } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
 
-// JZ TODO: fix -- can't have useExtension hook. Breaks hook rules.
-// const getCustomDataSource = (dataSourceID: string): CustomDataSource => {
-//   let datasource:CustomDataSource;
-//   const dataSources = useExtensions<DataSourceExtension>(isDataSource);
-//   dataSources.forEach(async (dataSource) => {
-//     const getDataSource = await dataSource.properties.getDataSource();
-//     datasource = getDataSource(dataSourceID);
-//   });
-//   return datasource;
-// }
-
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
 const isIntervalVariable = (itemKey: string): boolean =>
@@ -228,26 +217,27 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
     observe.getIn(['dashboards', activePerspective, 'variables']),
   );
 
-  // JZ NOTE: variable.datasource -- pull the dataSource object and pass into getPrometheusURL
   const variable = variables.toJS()[name];
   const query = evaluateTemplate(variable.query, variables, timespan);
 
+  // //  JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
+  // const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
   // const dataSourceID = variable?.datasource?.uid;
-  // const customDataSource: CustomDataSource =  dataSourceID ? getCustomDataSource(dataSourceID): undefined;
+  // const dataSources = useExtensions<DataSourceExtension>(isDataSource);
 
-  //  JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
-  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
-  const dataSourceID = variable?.datasource?.uid;
-  const dataSources = useExtensions<DataSourceExtension>(isDataSource);
+  // React.useEffect(() => {
+  //   if (dataSourceID) {
+  //     dataSources.forEach(async (dataSource) => {
+  //       const getDataSource = await dataSource.properties.getDataSource();
+  //       setCustomDataSource(getDataSource(dataSourceID));
+  //     });
+  //   }
+  // }, [dataSources, dataSourceID]);
 
-  React.useEffect(() => {
-    if (dataSourceID) {
-      dataSources.forEach(async (dataSource) => {
-        const getDataSource = await dataSource.properties.getDataSource();
-        setCustomDataSource(getDataSource(dataSourceID));
-      });
-    }
-  }, [dataSources, dataSourceID]);
+  // JZ NOTE: execute only when needed -- save on performance
+  // add a condition to check type undefined or actual basePath:stirng
+
+  // const customDataSource = typeof variable?.datasource?.basePath === 'string' ? variable.datasource.basePath : undefined;
 
   const dispatch = useDispatch();
 
@@ -272,7 +262,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
           timespan,
           namespace,
         },
-        customDataSource?.basePath,
+        // customDataSource,
       );
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
@@ -290,7 +280,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
           }
         });
     }
-  }, [activePerspective, customDataSource, dispatch, name, namespace, query, safeFetch, timespan]);
+  }, [activePerspective, dispatch, name, namespace, query, safeFetch, timespan]);
 
   React.useEffect(() => {
     if (variable.value && variable.value !== getQueryArgument(name)) {
@@ -548,22 +538,14 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
 
-  // JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
-  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
-  const dataSourceID = panel.datasource?.uid;
-  const dataSources = useExtensions<DataSourceExtension>(isDataSource);
-
-  // JZ NOTE: useResolvedExtension hook ... maybe
+  const [dataSourceInfo, setDataSourceInfo] = React.useState<CustomDataSource>();
   React.useEffect(() => {
-    if (dataSourceID) {
-      dataSources.forEach(async (dataSource) => {
-        const getDataSource = await dataSource.properties.getDataSource();
-        setCustomDataSource(getDataSource(dataSourceID));
+    if (panel?.getDataSourceInfo) {
+      panel?.getDataSourceInfo()?.then((datasource) => {
+        setDataSourceInfo(datasource);
       });
     }
-  }, [dataSources, dataSourceID]);
-
-  // const customDataSource: CustomDataSource =  panel.datasource?.uid ? getCustomDataSource(panel.datasource.uid): undefined;
+  }, [panel]);
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -641,7 +623,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
-                    customDataSource={customDataSource}
+                    customDataSource={dataSourceInfo}
                   />
                 )}
                 {panel.type === 'graph' && (
@@ -654,7 +636,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     units={panel.yaxes?.[0]?.format}
                     onZoomHandle={handleZoom}
                     namespace={namespace}
-                    customDataSource={customDataSource}
+                    customDataSource={dataSourceInfo}
                   />
                 )}
                 {(panel.type === 'singlestat' || panel.type === 'gauge') && (
@@ -663,7 +645,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
-                    customDataSource={customDataSource}
+                    customDataSource={dataSourceInfo}
                   />
                 )}
                 {panel.type === 'table' && (
@@ -672,7 +654,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     queries={queries}
                     namespace={namespace}
-                    customDataSource={customDataSource}
+                    customDataSource={dataSourceInfo}
                   />
                 )}
               </>
@@ -756,6 +738,15 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     [boards],
   );
 
+  const dataSources = useExtensions<DataSourceExtension>(isDataSource);
+  const dataSource = dataSources.find(
+    (extension) => extension.pluginName === 'dashboards-datasource-plugin',
+  );
+  const getDataSource = async (dataSourceID: string) => {
+    const extensionFunction = await dataSource.properties.getDataSource();
+    return extensionFunction(dataSourceID);
+  };
+
   const changeBoard = React.useCallback(
     (newBoard: string) => {
       let timeSpan: string;
@@ -825,15 +816,11 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [namespace]);
 
-  // JZ TODO: add another parameter for panel.datasource -->
-  // then pass down props MonitoringPage > Board > PanelRows > Cards --> panel.datasource --> extFunc(dataSourceID) --> url to fetch data
-  // panel > datasourceInfo {url: extFx(sourceID)=>url}
-
   // If we don't find any rows, build the rows array based on what we have in `data.panels`
   const rows = React.useMemo(() => {
     const data = _.find(boards, { name: board })?.data;
 
-    return data?.rows?.length
+    const dataRows = data?.rows?.length
       ? data.rows
       : data?.panels?.reduce((acc, panel) => {
           if (panel.type === 'row') {
@@ -849,7 +836,25 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
           }
           return acc;
         }, []);
-  }, [board, boards]);
+
+    return dataRows?.map((row) => {
+      if (!row) {
+        return undefined;
+      }
+      return {
+        ...row,
+        panels: row.panels?.map((panel) => {
+          if (panel?.datasource?.uid) {
+            panel.getDataSourceInfo = (): Promise<CustomDataSource> => {
+              return getDataSource(panel?.datasource?.uid);
+            };
+            return panel;
+          }
+          return panel;
+        }),
+      };
+    });
+  }, [board, boards, getDataSource]);
 
   if (error) {
     return <ErrorAlert message={error} />;

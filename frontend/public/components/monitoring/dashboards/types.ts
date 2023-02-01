@@ -1,3 +1,5 @@
+import { CustomDataSource } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 export const MONITORING_DASHBOARDS_DEFAULT_TIMESPAN = 30 * 60 * 1000;
 
 export const MONITORING_DASHBOARDS_VARIABLE_ALL_OPTION_KEY = 'ALL_OPTION_KEY';
@@ -29,6 +31,7 @@ export type Panel = {
   };
   decimals?: number;
   format?: string;
+  getDataSourceInfo?(): Promise<CustomDataSource>;
   gridPos?: {
     h: number;
     w: number;

@@ -26,8 +26,27 @@ export const getAllVariables = (boards: Board[], newBoardName: string, namespace
         value = MONITORING_DASHBOARDS_VARIABLE_ALL_OPTION_KEY;
       }
 
+      // let calls = 0;
+      // const getDataSourceInfo = (): CustomDataSource => {
+      //   if (typeof v?.datasource?.uid === 'string' && getDataSource) {
+      //     try {
+      //       if (calls > 100) return null;
+      //        getDataSource(v?.datasource?.uid).then(datasource => {
+      //         calls += 1;
+      //         console.log("JZ getAllVariables > getDataSourceInfo() INSIDE ,", datasource)
+      //         return datasource;
+      //       })
+      //     } catch (error) {
+      //       return null;
+      //     }
+      //   } else {
+      //     return null;
+      //   }
+      // }
+
+      // console.log("JZ getAllVariables > getDataSourceInfo() OUTSIDE ,", v?.datasource?.uid ? await getDataSource(v?.datasource?.uid) : null,)
+
       allVariables[v.name] = ImmutableMap({
-        datasource: v.datasource,
         includeAll: !!v.includeAll,
         isHidden: namespace && v.name === 'namespace' ? true : v.hide !== 0,
         isLoading: namespace ? v.type === 'query' && !namespace : v.type === 'query',
