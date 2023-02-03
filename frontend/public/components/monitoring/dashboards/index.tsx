@@ -67,7 +67,7 @@ import { useFetchDashboards } from './useFetchDashboards';
 import {
   DEFAULT_GRAPH_SAMPLES,
   getActivePerspective,
-  getAllVariables,
+  getAllVariablesTEST,
 } from './monitoring-dashboard-utils';
 
 import { useExtensions } from '@console/plugin-sdk/src';
@@ -220,6 +220,17 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const variable = variables.toJS()[name];
   const query = evaluateTemplate(variable.query, variables, timespan);
 
+  const basePath = variable?.dataSource?.basePath;
+
+  // console.log("JZ VariableDropDown > datasource.basePath : ", basePath)
+
+  // console.log("JZ VariableDropDown > varibleS", JSON.stringify(variables, null, 2));
+  // console.log("JZ VariableDropDown > varible", JSON.stringify(variable, null, 2));
+
+  // const basePath = variable?.dataSource?.basePath
+
+  // console.log("JZ VariablesDropDown customDataSource, ", basePath);
+
   // //  JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
   // const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
   // const dataSourceID = variable?.datasource?.uid;
@@ -262,7 +273,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
           timespan,
           namespace,
         },
-        // customDataSource,
+        basePath,
       );
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
@@ -280,7 +291,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
           }
         });
     }
-  }, [activePerspective, dispatch, name, namespace, query, safeFetch, timespan]);
+  }, [activePerspective, basePath, dispatch, name, namespace, query, safeFetch, timespan]);
 
   React.useEffect(() => {
     if (variable.value && variable.value !== getQueryArgument(name)) {
@@ -738,14 +749,15 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
     [boards],
   );
 
-  const dataSources = useExtensions<DataSourceExtension>(isDataSource);
-  const dataSource = dataSources.find(
-    (extension) => extension.pluginName === 'dashboards-datasource-plugin',
+  const extensions = useExtensions<DataSourceExtension>(isDataSource);
+  const extension = extensions.find((ext) => ext.pluginName === 'dashboards-datasource-plugin');
+  const extensionFunction = React.useCallback(
+    async (dataSourceID: string) => {
+      const extFunc = await extension.properties.getDataSource();
+      return extFunc(dataSourceID);
+    },
+    [extension],
   );
-  const getDataSource = async (dataSourceID: string) => {
-    const extensionFunction = await dataSource.properties.getDataSource();
-    return extensionFunction(dataSourceID);
-  };
 
   const changeBoard = React.useCallback(
     (newBoard: string) => {
@@ -779,8 +791,20 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
           history.replace(url);
         }
 
-        const allVariables = getAllVariables(boards, newBoard, namespace);
-        dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
+        // const allVariables = getAllVariables(boards, newBoard, namespace);
+        // console.log("JZ ln 784 allVariables : ", JSON.stringify(allVariables, null, 2) );
+        // dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
+
+        const allVariablesTEST = getAllVariablesTEST(
+          boards,
+          newBoard,
+          namespace,
+          extensionFunction,
+        );
+        allVariablesTEST.then((results) => {
+          //console.log("JZ ln 787 allVariablesTEST: ", JSON.stringify(results, null, 2))
+          dispatch(dashboardsPatchAllVariables(results, activePerspective));
+        });
 
         // Set time range and poll interval options to their defaults or from the query params if
         // available
@@ -798,7 +822,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
         setBoard(newBoard);
       }
     },
-    [activePerspective, board, boards, dispatch, namespace],
+    [activePerspective, board, boards, dispatch, extensionFunction, namespace],
   );
 
   // Display dashboard present in the params or show the first board
@@ -811,8 +835,16 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
 
   React.useEffect(() => {
     const newBoard = getQueryArgument('dashboard');
-    const allVariables = getAllVariables(boards, newBoard, namespace);
-    dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
+    // const allVariables = getAllVariables(boards, newBoard, namespace, dataSource);
+    // console.log("JZ ln 822 allVariables : ", JSON.stringify(allVariables, null, 2 ));
+    // dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
+
+    const allVariablesTEST = getAllVariablesTEST(boards, newBoard, namespace, extensionFunction);
+    allVariablesTEST.then((results) => {
+      // console.log("JZ ln 826 allVariablesTEST > results ", JSON.stringify(results, null, 2))
+      dispatch(dashboardsPatchAllVariables(results, activePerspective));
+    });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [namespace]);
 
@@ -846,7 +878,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
         panels: row.panels?.map((panel) => {
           if (panel?.datasource?.uid) {
             panel.getDataSourceInfo = (): Promise<CustomDataSource> => {
-              return getDataSource(panel?.datasource?.uid);
+              return extensionFunction(panel?.datasource?.uid);
             };
             return panel;
           }
@@ -854,7 +886,7 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
         }),
       };
     });
-  }, [board, boards, getDataSource]);
+  }, [board, boards, extensionFunction]);
 
   if (error) {
     return <ErrorAlert message={error} />;
