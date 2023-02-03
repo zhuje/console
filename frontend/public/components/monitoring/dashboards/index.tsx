@@ -67,7 +67,7 @@ import { useFetchDashboards } from './useFetchDashboards';
 import {
   DEFAULT_GRAPH_SAMPLES,
   getActivePerspective,
-  getAllVariablesTEST,
+  getAllVariables,
 } from './monitoring-dashboard-utils';
 
 import { useExtensions } from '@console/plugin-sdk/src';
@@ -222,34 +222,6 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
 
   const basePath = variable?.dataSource?.basePath;
 
-  // console.log("JZ VariableDropDown > datasource.basePath : ", basePath)
-
-  // console.log("JZ VariableDropDown > varibleS", JSON.stringify(variables, null, 2));
-  // console.log("JZ VariableDropDown > varible", JSON.stringify(variable, null, 2));
-
-  // const basePath = variable?.dataSource?.basePath
-
-  // console.log("JZ VariablesDropDown customDataSource, ", basePath);
-
-  // //  JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
-  // const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
-  // const dataSourceID = variable?.datasource?.uid;
-  // const dataSources = useExtensions<DataSourceExtension>(isDataSource);
-
-  // React.useEffect(() => {
-  //   if (dataSourceID) {
-  //     dataSources.forEach(async (dataSource) => {
-  //       const getDataSource = await dataSource.properties.getDataSource();
-  //       setCustomDataSource(getDataSource(dataSourceID));
-  //     });
-  //   }
-  // }, [dataSources, dataSourceID]);
-
-  // JZ NOTE: execute only when needed -- save on performance
-  // add a condition to check type undefined or actual basePath:stirng
-
-  // const customDataSource = typeof variable?.datasource?.basePath === 'string' ? variable.datasource.basePath : undefined;
-
   const dispatch = useDispatch();
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
@@ -263,7 +235,6 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       // be converted to use that instead
       const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
 
-      // JZ TODO: Update this to handle Proxy
       const url = getPrometheusURL(
         {
           endpoint: PrometheusEndpoint.QUERY_RANGE,
@@ -791,18 +762,8 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
           history.replace(url);
         }
 
-        // const allVariables = getAllVariables(boards, newBoard, namespace);
-        // console.log("JZ ln 784 allVariables : ", JSON.stringify(allVariables, null, 2) );
-        // dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
-
-        const allVariablesTEST = getAllVariablesTEST(
-          boards,
-          newBoard,
-          namespace,
-          extensionFunction,
-        );
-        allVariablesTEST.then((results) => {
-          //console.log("JZ ln 787 allVariablesTEST: ", JSON.stringify(results, null, 2))
+        const allVariables = getAllVariables(boards, newBoard, namespace, extensionFunction);
+        allVariables.then((results) => {
           dispatch(dashboardsPatchAllVariables(results, activePerspective));
         });
 
@@ -835,13 +796,9 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
 
   React.useEffect(() => {
     const newBoard = getQueryArgument('dashboard');
-    // const allVariables = getAllVariables(boards, newBoard, namespace, dataSource);
-    // console.log("JZ ln 822 allVariables : ", JSON.stringify(allVariables, null, 2 ));
-    // dispatch(dashboardsPatchAllVariables(allVariables, activePerspective));
 
-    const allVariablesTEST = getAllVariablesTEST(boards, newBoard, namespace, extensionFunction);
-    allVariablesTEST.then((results) => {
-      // console.log("JZ ln 826 allVariablesTEST > results ", JSON.stringify(results, null, 2))
+    const allVariables = getAllVariables(boards, newBoard, namespace, extensionFunction);
+    allVariables.then((results) => {
       dispatch(dashboardsPatchAllVariables(results, activePerspective));
     });
 
