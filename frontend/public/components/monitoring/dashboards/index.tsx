@@ -220,7 +220,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const variable = variables.toJS()[name];
   const query = evaluateTemplate(variable.query, variables, timespan);
 
-  const basePath = variable?.dataSource?.basePath;
+  const dataSource = variable?.dataSource;
 
   const dispatch = useDispatch();
 
@@ -229,40 +229,75 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const [isError, setIsError] = React.useState(false);
 
   React.useEffect(() => {
-    if (query) {
-      // Convert label_values queries to something Prometheus can handle
-      // TODO: Once the Prometheus /series endpoint is available through the API proxy, this should
-      // be converted to use that instead
-      const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
+    if (!dataSource) {
+      if (query) {
+        // Convert label_values queries to something Prometheus can handle
+        // TODO: Once the Prometheus /series endpoint is available through the API proxy, this should
+        // be converted to use that instead
+        const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
 
-      const url = getPrometheusURL(
-        {
+        const url = getPrometheusURL({
           endpoint: PrometheusEndpoint.QUERY_RANGE,
           query: prometheusQuery,
           samples: DEFAULT_GRAPH_SAMPLES,
           timeout: '60s',
           timespan,
           namespace,
-        },
-        basePath,
-      );
-
-      dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
-
-      safeFetch(url)
-        .then(({ data }) => {
-          setIsError(false);
-          const newOptions = _.flatMap(data?.result, ({ metric }) => _.values(metric)).sort();
-          dispatch(dashboardsVariableOptionsLoaded(name, newOptions, activePerspective));
-        })
-        .catch((err) => {
-          dispatch(dashboardsPatchVariable(name, { isLoading: false }, activePerspective));
-          if (err.name !== 'AbortError') {
-            setIsError(true);
-          }
         });
+
+        dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
+
+        safeFetch(url)
+          .then(({ data }) => {
+            setIsError(false);
+            const newOptions = _.flatMap(data?.result, ({ metric }) => _.values(metric)).sort();
+            dispatch(dashboardsVariableOptionsLoaded(name, newOptions, activePerspective));
+          })
+          .catch((err) => {
+            dispatch(dashboardsPatchVariable(name, { isLoading: false }, activePerspective));
+            if (err.name !== 'AbortError') {
+              setIsError(true);
+            }
+          });
+      }
+    } else {
+      if (dataSource.basePath) {
+        if (query) {
+          // Convert label_values queries to something Prometheus can handle
+          // TODO: Once the Prometheus /series endpoint is available through the API proxy, this should
+          // be converted to use that instead
+          const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
+
+          const url = getPrometheusURL(
+            {
+              endpoint: PrometheusEndpoint.QUERY_RANGE,
+              query: prometheusQuery,
+              samples: DEFAULT_GRAPH_SAMPLES,
+              timeout: '60s',
+              timespan,
+              namespace,
+            },
+            dataSource.basePath,
+          );
+
+          dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
+
+          safeFetch(url)
+            .then(({ data }) => {
+              setIsError(false);
+              const newOptions = _.flatMap(data?.result, ({ metric }) => _.values(metric)).sort();
+              dispatch(dashboardsVariableOptionsLoaded(name, newOptions, activePerspective));
+            })
+            .catch((err) => {
+              dispatch(dashboardsPatchVariable(name, { isLoading: false }, activePerspective));
+              if (err.name !== 'AbortError') {
+                setIsError(true);
+              }
+            });
+        }
+      }
     }
-  }, [activePerspective, basePath, dispatch, name, namespace, query, safeFetch, timespan]);
+  }, [activePerspective, dataSource, dispatch, name, namespace, query, safeFetch, timespan]);
 
   React.useEffect(() => {
     if (variable.value && variable.value !== getQueryArgument(name)) {
@@ -520,10 +555,16 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
 
-  const [dataSourceInfo, setDataSourceInfo] = React.useState<CustomDataSource>();
+  const [dataSourceInfoLoading, setDataSourceInfoLoading] = React.useState<boolean>(true);
+  const [dataSourceInfo, setDataSourceInfo] = React.useState<CustomDataSource>(undefined);
   React.useEffect(() => {
+    if (!panel?.getDataSourceInfo) {
+      setDataSourceInfoLoading(false);
+    }
     if (panel?.getDataSourceInfo) {
+      setDataSourceInfoLoading(true);
       panel?.getDataSourceInfo()?.then((datasource) => {
+        setDataSourceInfoLoading(false);
         setDataSourceInfo(datasource);
       });
     }
@@ -565,7 +606,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     return null;
   }
   const queries = rawQueries.map((expr) => evaluateTemplate(expr, variables, timespan));
-  const isLoading = _.some(queries, _.isUndefined);
+  const isLoading = _.some(queries, _.isUndefined) && dataSourceInfoLoading;
 
   const panelClassModifier = getPanelClassModifier(panel);
 
