@@ -77,6 +77,10 @@ import {
   CustomDataSource,
 } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
 
+// JZ NOTE: extensionPlugin fetching is centralized to parent component <MonitoringDashboardPage>
+// Still has async warnings for occuring in children
+// Still needs to be clean up
+
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
 const isIntervalVariable = (itemKey: string): boolean =>
