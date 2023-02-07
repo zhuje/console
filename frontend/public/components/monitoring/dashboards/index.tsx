@@ -77,16 +77,14 @@ import {
   CustomDataSource,
 } from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
 
-// JZ TODO: fix -- can't have useExtension hook. Breaks hook rules.
-// const getCustomDataSource = (dataSourceID: string): CustomDataSource => {
-//   let datasource:CustomDataSource;
-//   const dataSources = useExtensions<DataSourceExtension>(isDataSource);
-//   dataSources.forEach(async (dataSource) => {
-//     const getDataSource = await dataSource.properties.getDataSource();
-//     datasource = getDataSource(dataSourceID);
-//   });
-//   return datasource;
-// }
+// JZ NOTE: This is the final version saved before squash/rebase.
+// This version of OU-110 rollbacks changes from branch OU-110-original-history, so
+// that extension function fetching back in the children (<Cards> and <VariableDropDown>)
+// rather than  <MonitoringDashboardPage>.
+// It does not produce async warning alerts but the concern is it maybe slower performance.
+// It is less performative because we're fetching and handling the extension function for
+// each render of each child. Rather than fetching and handling the extension function
+// once in the parent and passing this information to the children.
 
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
