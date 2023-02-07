@@ -236,7 +236,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   // const customDataSource: CustomDataSource =  dataSourceID ? getCustomDataSource(dataSourceID): undefined;
 
   //  JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
-  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
+  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
   const dataSourceID = variable?.datasource?.uid;
   const dataSources = useExtensions<DataSourceExtension>(isDataSource);
 
@@ -256,24 +256,46 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const [isError, setIsError] = React.useState(false);
 
   React.useEffect(() => {
+    // Convert label_values queries to something Prometheus can handle
+    // TODO: Once the Prometheus /series endpoint is available through the API proxy, this should
+    // be converted to use that instead
     if (query) {
-      // Convert label_values queries to something Prometheus can handle
-      // TODO: Once the Prometheus /series endpoint is available through the API proxy, this should
-      // be converted to use that instead
       const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
 
       // JZ TODO: Update this to handle Proxy
-      const url = getPrometheusURL(
-        {
-          endpoint: PrometheusEndpoint.QUERY_RANGE,
-          query: prometheusQuery,
-          samples: DEFAULT_GRAPH_SAMPLES,
-          timeout: '60s',
-          timespan,
-          namespace,
-        },
-        customDataSource?.basePath,
-      );
+      // const url = getPrometheusURL(
+      //   {
+      //     endpoint: PrometheusEndpoint.QUERY_RANGE,
+      //     query: prometheusQuery,
+      //     samples: DEFAULT_GRAPH_SAMPLES,
+      //     timeout: '60s',
+      //     timespan,
+      //     namespace,
+      //   },
+      //   customDataSource?.basePath,
+      // );
+
+      const promProps = {
+        endpoint: PrometheusEndpoint.QUERY_RANGE,
+        query: prometheusQuery,
+        samples: DEFAULT_GRAPH_SAMPLES,
+        timeout: '60s',
+        timespan,
+        namespace,
+      };
+      const promURL = () => {
+        if (!customDataSource) {
+          return getPrometheusURL(promProps);
+        }
+        if (customDataSource?.basePath) {
+          return getPrometheusURL(promProps, customDataSource.basePath);
+        }
+      };
+
+      const url = promURL();
+      if (!url) {
+        return;
+      }
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
 
@@ -549,17 +571,22 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const [, wasEverVisible] = useIsVisible(ref);
 
   // JZ TODO: move to top level 'Monitoring..page' -- then 'panel' will contain customdataSource
-  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>();
+  const [dataSourceInfoLoading, setDataSourceInfoLoading] = React.useState<boolean>(true);
+  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
   const dataSourceID = panel.datasource?.uid;
   const dataSources = useExtensions<DataSourceExtension>(isDataSource);
 
   // JZ NOTE: useResolvedExtension hook ... maybe
   React.useEffect(() => {
-    if (dataSourceID) {
+    if (!dataSourceID) {
+      setDataSourceInfoLoading(false);
+    } else {
+      setDataSourceInfoLoading(true);
       dataSources.forEach(async (dataSource) => {
         const getDataSource = await dataSource.properties.getDataSource();
         setCustomDataSource(getDataSource(dataSourceID));
       });
+      setDataSourceInfoLoading(false);
     }
   }, [dataSources, dataSourceID]);
 
@@ -601,7 +628,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     return null;
   }
   const queries = rawQueries.map((expr) => evaluateTemplate(expr, variables, timespan));
-  const isLoading = _.some(queries, _.isUndefined);
+  const isLoading = _.some(queries, _.isUndefined) && dataSourceInfoLoading;
 
   const panelClassModifier = getPanelClassModifier(panel);
 

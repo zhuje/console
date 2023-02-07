@@ -1,70 +1,1101 @@
 # OpenShift Console API
 
-1.  [`useActivePerspective`](#useactiveperspective)
-2.  [`GreenCheckCircleIcon`](#greencheckcircleicon)
-3.  [`RedExclamationCircleIcon`](#redexclamationcircleicon)
-4.  [`YellowExclamationTriangleIcon`](#yellowexclamationtriangleicon)
-5.  [`BlueInfoCircleIcon`](#blueinfocircleicon)
-6.  [`ErrorStatus`](#errorstatus)
-7.  [`InfoStatus`](#infostatus)
-8.  [`ProgressStatus`](#progressstatus)
-9.  [`SuccessStatus`](#successstatus)
-10.  [`checkAccess`](#checkaccess)
-11.  [`useAccessReview`](#useaccessreview)
-12.  [`useResolvedExtensions`](#useresolvedextensions)
-13.  [`HorizontalNav`](#horizontalnav)
-14.  [`VirtualizedTable`](#virtualizedtable)
-15.  [`TableData`](#tabledata)
-16.  [`useActiveColumns`](#useactivecolumns)
-17.  [`ListPageHeader`](#listpageheader)
-18.  [`ListPageCreate`](#listpagecreate)
-19.  [`ListPageCreateLink`](#listpagecreatelink)
-20.  [`ListPageCreateButton`](#listpagecreatebutton)
-21.  [`ListPageCreateDropdown`](#listpagecreatedropdown)
-22.  [`ListPageFilter`](#listpagefilter)
-23.  [`useListPageFilter`](#uselistpagefilter)
-24.  [`ResourceLink`](#resourcelink)
-25.  [`ResourceIcon`](#resourceicon)
-26.  [`useK8sModel`](#usek8smodel)
-27.  [`useK8sModels`](#usek8smodels)
-28.  [`useK8sWatchResource`](#usek8swatchresource)
-29.  [`useK8sWatchResources`](#usek8swatchresources)
-30.  [`consoleFetch`](#consolefetch)
-31.  [`consoleFetchJSON`](#consolefetchjson)
-32.  [`consoleFetchText`](#consolefetchtext)
-33.  [`getConsoleRequestHeaders`](#getconsolerequestheaders)
-34.  [`k8sGetResource`](#k8sgetresource)
-35.  [`k8sCreateResource`](#k8screateresource)
-36.  [`k8sUpdateResource`](#k8supdateresource)
-37.  [`k8sPatchResource`](#k8spatchresource)
-38.  [`k8sDeleteResource`](#k8sdeleteresource)
-39.  [`k8sListResource`](#k8slistresource)
-40.  [`k8sListResourceItems`](#k8slistresourceitems)
-41.  [`getAPIVersionForModel`](#getapiversionformodel)
-42.  [`getGroupVersionKindForResource`](#getgroupversionkindforresource)
-43.  [`getGroupVersionKindForModel`](#getgroupversionkindformodel)
-44.  [`StatusPopupSection`](#statuspopupsection)
-45.  [`StatusPopupItem`](#statuspopupitem)
-46.  [`Overview`](#overview)
-47.  [`OverviewGrid`](#overviewgrid)
-48.  [`InventoryItem`](#inventoryitem)
-49.  [`InventoryItemTitle`](#inventoryitemtitle)
-50.  [`InventoryItemBody`](#inventoryitembody)
-51.  [`InventoryItemStatus`](#inventoryitemstatus)
-52.  [`InventoryItemLoading`](#inventoryitemloading)
-53.  [`useFlag`](#useflag)
-54.  [`YAMLEditor`](#yamleditor)
-55.  [`ResourceYAMLEditor`](#resourceyamleditor)
-56.  [`ResourceEventStream`](#resourceeventstream)
-57.  [`usePrometheusPoll`](#useprometheuspoll)
-58.  [`Timestamp`](#timestamp)
-59.  [`useModal`](#usemodal)
-60.  [`ActionServiceProvider`](#actionserviceprovider)
-61.  [`NamespaceBar`](#namespacebar)
-62.  [`ErrorBoundaryFallbackPage`](#errorboundaryfallbackpage)
-63. [DEPRECATED] [`PerspectiveContext`](#perspectivecontext)
-64. [DEPRECATED] [`useAccessReviewAllowed`](#useaccessreviewallowed)
-65. [DEPRECATED] [`useSafetyFirst`](#usesafetyfirst)
+1.  [`consoleFetch`](#consolefetch)
+2.  [`consoleFetchJSON`](#consolefetchjson)
+3.  [`consoleFetchText`](#consolefetchtext)
+4.  [`getConsoleRequestHeaders`](#getconsolerequestheaders)
+5.  [`k8sGetResource`](#k8sgetresource)
+6.  [`k8sCreateResource`](#k8screateresource)
+7.  [`k8sUpdateResource`](#k8supdateresource)
+8.  [`k8sPatchResource`](#k8spatchresource)
+9.  [`k8sDeleteResource`](#k8sdeleteresource)
+10.  [`k8sListResource`](#k8slistresource)
+11.  [`k8sListResourceItems`](#k8slistresourceitems)
+12.  [`getAPIVersionForModel`](#getapiversionformodel)
+13.  [`getGroupVersionKindForResource`](#getgroupversionkindforresource)
+14.  [`getGroupVersionKindForModel`](#getgroupversionkindformodel)
+15.  [`StatusPopupSection`](#statuspopupsection)
+16.  [`StatusPopupItem`](#statuspopupitem)
+17.  [`Overview`](#overview)
+18.  [`OverviewGrid`](#overviewgrid)
+19.  [`InventoryItem`](#inventoryitem)
+20.  [`InventoryItemTitle`](#inventoryitemtitle)
+21.  [`InventoryItemBody`](#inventoryitembody)
+22.  [`InventoryItemStatus`](#inventoryitemstatus)
+23.  [`InventoryItemLoading`](#inventoryitemloading)
+24.  [`useFlag`](#useflag)
+25.  [`YAMLEditor`](#yamleditor)
+26.  [`ResourceYAMLEditor`](#resourceyamleditor)
+27.  [`ResourceEventStream`](#resourceeventstream)
+28.  [`usePrometheusPoll`](#useprometheuspoll)
+29.  [`Timestamp`](#timestamp)
+30.  [`useModal`](#usemodal)
+31.  [`ActionServiceProvider`](#actionserviceprovider)
+32.  [`NamespaceBar`](#namespacebar)
+33.  [`ErrorBoundaryFallbackPage`](#errorboundaryfallbackpage)
+34.  [`PluginDataTypes`](#plugindatatypes)
+35.  [`useActivePerspective`](#useactiveperspective)
+36.  [`GreenCheckCircleIcon`](#greencheckcircleicon)
+37.  [`RedExclamationCircleIcon`](#redexclamationcircleicon)
+38.  [`YellowExclamationTriangleIcon`](#yellowexclamationtriangleicon)
+39.  [`BlueInfoCircleIcon`](#blueinfocircleicon)
+40.  [`ErrorStatus`](#errorstatus)
+41.  [`InfoStatus`](#infostatus)
+42.  [`ProgressStatus`](#progressstatus)
+43.  [`SuccessStatus`](#successstatus)
+44.  [`checkAccess`](#checkaccess)
+45.  [`useAccessReview`](#useaccessreview)
+46.  [`useResolvedExtensions`](#useresolvedextensions)
+47.  [`HorizontalNav`](#horizontalnav)
+48.  [`VirtualizedTable`](#virtualizedtable)
+49.  [`TableData`](#tabledata)
+50.  [`useActiveColumns`](#useactivecolumns)
+51.  [`ListPageHeader`](#listpageheader)
+52.  [`ListPageCreate`](#listpagecreate)
+53.  [`ListPageCreateLink`](#listpagecreatelink)
+54.  [`ListPageCreateButton`](#listpagecreatebutton)
+55.  [`ListPageCreateDropdown`](#listpagecreatedropdown)
+56.  [`ListPageFilter`](#listpagefilter)
+57.  [`useListPageFilter`](#uselistpagefilter)
+58.  [`ResourceLink`](#resourcelink)
+59.  [`ResourceIcon`](#resourceicon)
+60.  [`useK8sModel`](#usek8smodel)
+61.  [`useK8sModels`](#usek8smodels)
+62.  [`useK8sWatchResource`](#usek8swatchresource)
+63.  [`useK8sWatchResources`](#usek8swatchresources)
+64. [DEPRECATED] [`PerspectiveContext`](#perspectivecontext)
+65. [DEPRECATED] [`useAccessReviewAllowed`](#useaccessreviewallowed)
+66. [DEPRECATED] [`useSafetyFirst`](#usesafetyfirst)
+
+---
+
+## `consoleFetch`
+
+### Summary 
+
+A custom wrapper around `fetch` that adds console specific headers and allows for retries and timeouts.<br/>It also validates the response status code and throws appropriate error or logs out the user if required.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `url` | The URL to fetch |
+| `options` | The options to pass to fetch |
+| `timeout` | The timeout in milliseconds |
+
+
+
+### Returns
+
+A promise that resolves to the response
+
+
+---
+
+## `consoleFetchJSON`
+
+### Summary 
+
+A custom wrapper around `fetch` that adds console specific headers and allows for retries and timeouts.<br/>It also validates the response status code and throws appropriate error or logs out the user if required.<br/>It returns the response as a JSON object.<br/>Uses consoleFetch internally.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `url` | The URL to fetch |
+| `method` | The HTTP method to use. Defaults to GET |
+| `options` | The options to pass to fetch |
+| `timeout` | The timeout in milliseconds |
+| `cluster` | The name of the cluster to make the request to. Defaults to the active cluster the user has selected |
+
+
+
+### Returns
+
+A promise that resolves to the response as JSON object.
+
+
+---
+
+## `consoleFetchText`
+
+### Summary 
+
+A custom wrapper around `fetch` that adds console specific headers and allows for retries and timeouts.<br/>It also validates the response status code and throws appropriate error or logs out the user if required.<br/>It returns the response as a text.<br/>Uses consoleFetch internally.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `url` | The URL to fetch |
+| `options` | The options to pass to fetch |
+| `timeout` | The timeout in milliseconds |
+| `cluster` | The name of the cluster to make the request to. Defaults to the active cluster the user has selected |
+
+
+
+### Returns
+
+A promise that resolves to the response as text.
+
+
+---
+
+## `getConsoleRequestHeaders`
+
+### Summary 
+
+A function that creates impersonation and multicluster related headers for API requests using current redux state.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `targetCluster` | override the current active cluster with the provided targetCluster |
+
+
+
+### Returns
+
+an object containing the appropriate impersonation and clustr requst headers, based on redux state
+
+
+---
+
+## `k8sGetResource`
+
+### Summary 
+
+It fetches a resource from the cluster, based on the provided options.<br/>If the name is provided it returns one resource else it returns all the resources matching the model.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `options` | Which are passed as key-value pairs in the map |
+| `` |  options.model - k8s model |
+| `` |  options.name - The name of the resource, if not provided then it'll look for all the resources matching the model. |
+| `` |  options.ns - The namespace to look into, should not be specified for cluster-scoped resources. |
+| `` |  options.path - Appends as subpath if provided |
+| `` |  options.queryParams - The query parameters to be included in the URL. |
+| `` |  options.requestInit - The fetch init object to use. This can have request headers, method, redirect, etc. See more {@link https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.requestinit.html } |
+
+
+
+### Returns
+
+A promise that resolves to the response as JSON object with a resource if the name is provided<br/>else it returns all the resources matching the model. In case of failure, the promise gets rejected with HTTP error response.
+
+
+---
+
+## `k8sCreateResource`
+
+### Summary 
+
+It creates a resource in the cluster, based on the provided options.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `options` | Which are passed as key-value pairs in the map |
+| `` |  options.model - k8s model |
+| `` |  options.data - payload for the resource to be created |
+| `` |  options.path - Appends as subpath if provided |
+| `` |  options.queryParams - The query parameters to be included in the URL. |
+
+
+
+### Returns
+
+A promise that resolves to the response of the resource created.<br/>In case of failure promise gets rejected with HTTP error response.
+
+
+---
+
+## `k8sUpdateResource`
+
+### Summary 
+
+It updates the entire resource in the cluster, based on provided options.<br/>When a client needs to replace an existing resource entirely, they can use k8sUpdate.<br/>Alternatively can use k8sPatch to perform the partial update.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `options` | which are passed as key-value pair in the map |
+| `` |  options.model - k8s model |
+| `` |  options.data - payload for the k8s resource to be updated |
+| `` |  options.ns - namespace to look into, it should not be specified for cluster-scoped resources. |
+| `` |  options.name - resource name to be updated. |
+| `` |  options.path - Appends as subpath if provided |
+| `` |  options.queryParams - The query parameters to be included in the URL. |
+
+
+
+### Returns
+
+A promise that resolves to the response of the resource updated.<br/>In case of failure promise gets rejected with HTTP error response.
+
+
+---
+
+## `k8sPatchResource`
+
+### Summary 
+
+It patches any resource in the cluster, based on provided options.<br/>When a client needs to perform the partial update, they can use k8sPatch.<br/>Alternatively can use k8sUpdate to replace an existing resource entirely.<br/>See more https://datatracker.ietf.org/doc/html/rfc6902
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `options` | Which are passed as key-value pairs in the map. |
+| `` |  options.model - k8s model |
+| `` |  options.resource - The resource to be patched. |
+| `` |  options.data - Only the data to be patched on existing resource with the operation, path, and value. |
+| `` |  options.path - Appends as subpath if provided. |
+| `` |  options.queryParams - The query parameters to be included in the URL. |
+
+
+
+### Returns
+
+A promise that resolves to the response of the resource patched.<br/>In case of failure promise gets rejected with HTTP error response.
+
+
+---
+
+## `k8sDeleteResource`
+
+### Summary 
+
+It deletes resources from the cluster, based on the provided model, resource.<br/>The garbage collection works based on 'Foreground' | 'Background', can be configured with propagationPolicy property in provided model or passed in json.
+
+
+
+### Example
+
+
+```
+{ kind: 'DeleteOptions', apiVersion: 'v1', propagationPolicy }
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `options` | which are passed as key-value pair in the map. |
+| `` |  options.model - k8s model |
+| `` |  options.resource - The resource to be deleted. |
+| `` |  options.path - Appends as subpath if provided |
+| `` |  options.queryParams - The query parameters to be included in the URL. |
+| `` |  options.requestInit - The fetch init object to use. This can have request headers, method, redirect, etc. See more {@link https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.requestinit.html } |
+| `` |  options.json - Can control garbage collection of resources explicitly if provided else will default to model's "propagationPolicy". |
+
+
+
+### Returns
+
+A promise that resolves to the response of kind Status.<br/>In case of failure promise gets rejected with HTTP error response.
+
+
+---
+
+## `k8sListResource`
+
+### Summary 
+
+Lists the resources as an array in the cluster, based on provided options.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `options` | Which are passed as key-value pairs in the map |
+| `` |  options.model - k8s model |
+| `` |  options.queryParams - The query parameters to be included in the URL and can pass label selector's as well with key "labelSelector". |
+| `` |  options.requestInit - The fetch init object to use. This can have request headers, method, redirect, etc. See more {@link https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.requestinit.html } |
+
+
+
+### Returns
+
+A promise that resolves to the response
+
+
+---
+
+## `k8sListResourceItems`
+
+### Summary 
+
+Same interface as {@link k8sListResource} but returns the sub items.
+
+
+
+
+
+
+---
+
+## `getAPIVersionForModel`
+
+### Summary 
+
+Provides apiVersion for a k8s model.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `model` | k8s model |
+
+
+
+### Returns
+
+The apiVersion for the model i.e `group/version`.
+
+
+---
+
+## `getGroupVersionKindForResource`
+
+### Summary 
+
+Provides a group, version, and kind for a resource.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `resource` | k8s resource |
+
+
+
+### Returns
+
+The group, version, kind for the provided resource.<br/>If the resource does not have an API group, group "core" will be returned.<br/>If the resource has an invalid apiVersion then it'll throw Error.
+
+
+---
+
+## `getGroupVersionKindForModel`
+
+### Summary 
+
+Provides a group, version, and kind for a k8s model.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `model` | k8s model |
+
+
+
+### Returns
+
+The group, version, kind for the provided model.<br/>If the model does not have an apiGroup, group "core" will be returned.
+
+
+---
+
+## `StatusPopupSection`
+
+### Summary 
+
+Component that shows the status in a popup window. Helpful component for building `console.dashboards/overview/health/resource` extensions
+
+
+
+### Example
+
+
+```tsx
+  <StatusPopupSection
+    firstColumn={
+      <>
+        <span>{title}</span>
+        <span className="text-secondary">
+          My Example Item
+        </span>
+      </>
+    }
+    secondColumn='Status'
+  >
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `firstColumn` | values for first column of popup |
+| `secondColumn` | (optional) values for second column of popup |
+| `children` | (optional) children for the popup |
+
+
+
+---
+
+## `StatusPopupItem`
+
+### Summary 
+
+Status element used in status popup; used in `StatusPopupSection`
+
+
+
+### Example
+
+
+```tsx
+<StatusPopupSection
+   firstColumn='Example'
+   secondColumn='Status'
+>
+   <StatusPopupItem icon={healthStateMapping[MCGMetrics.state]?.icon}>
+      Complete
+   </StatusPopupItem>
+   <StatusPopupItem icon={healthStateMapping[RGWMetrics.state]?.icon}>
+       Pending
+   </StatusPopupItem>
+</StatusPopupSection>
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `value` | (optional) text value to display |
+| `icon` | (optional) icon to display |
+| `children` | child elements |
+
+
+
+---
+
+## `Overview`
+
+### Summary 
+
+Creates a wrapper component for a dashboard
+
+
+
+### Example
+
+
+```tsx
+    <Overview>
+      <OverviewGrid mainCards={mainCards} leftCards={leftCards} rightCards={rightCards} />
+    </Overview>
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `className` | (optional) style class for div |
+| `children` | (optional) elements of the dashboard |
+
+
+
+---
+
+## `OverviewGrid`
+
+### Summary 
+
+Creates a grid of card elements for a dashboard; used within `Overview`
+
+
+
+### Example
+
+
+```tsx
+    <Overview>
+      <OverviewGrid mainCards={mainCards} leftCards={leftCards} rightCards={rightCards} />
+    </Overview>
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `mainCards` | cards for grid |
+| `leftCards` | (optional) cards for left side of grid |
+| `rightCards` | (optional) cards for right side of grid |
+
+
+
+---
+
+## `InventoryItem`
+
+### Summary 
+
+Creates an inventory card item
+
+
+
+### Example
+
+
+```tsx
+  return (
+    <InventoryItem>
+      <InventoryItemTitle>{title}</InventoryItemTitle>
+      <InventoryItemBody error={loadError}>
+        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
+      </InventoryItemBody>
+    </InventoryItem>
+  )
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `children` | elements to render inside the item |
+
+
+
+---
+
+## `InventoryItemTitle`
+
+### Summary 
+
+Creates a title for an inventory card item; used within `InventoryItem`
+
+
+
+### Example
+
+
+ ```tsx
+  return (
+    <InventoryItem>
+      <InventoryItemTitle>{title}</InventoryItemTitle>
+      <InventoryItemBody error={loadError}>
+        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
+      </InventoryItemBody>
+    </InventoryItem>
+  )
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `children` | elements to render inside the title |
+
+
+
+---
+
+## `InventoryItemBody`
+
+### Summary 
+
+Creates the body of an inventory card; used within `InventoryCard` and can be used with `InventoryTitle`
+
+
+
+### Example
+
+
+ ```tsx
+  return (
+    <InventoryItem>
+      <InventoryItemTitle>{title}</InventoryItemTitle>
+      <InventoryItemBody error={loadError}>
+        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
+      </InventoryItemBody>
+    </InventoryItem>
+  )
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `children` | elements to render inside the Inventory Card or title |
+| `error` | elements of the div |
+
+
+
+---
+
+## `InventoryItemStatus`
+
+### Summary 
+
+Creates a count and icon for an inventory card with optional link address; used within `InventoryItemBody`
+
+
+
+### Example
+
+
+ ```tsx
+  return (
+    <InventoryItem>
+      <InventoryItemTitle>{title}</InventoryItemTitle>
+      <InventoryItemBody error={loadError}>
+        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
+      </InventoryItemBody>
+    </InventoryItem>
+  )
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `count` | count for display |
+| `icon` | icon for display |
+| `linkTo` | (optional) link address |
+
+
+
+---
+
+## `InventoryItemLoading`
+
+### Summary 
+
+Creates a skeleton container for when an inventory card is loading; used with `InventoryItem` and related components
+
+
+
+### Example
+
+
+```tsx
+if (loadError) {
+   title = <Link to={workerNodesLink}>{t('Worker Nodes')}</Link>;
+} else if (!loaded) {
+  title = <><InventoryItemLoading /><Link to={workerNodesLink}>{t('Worker Nodes')}</Link></>;
+}
+return (
+  <InventoryItem>
+    <InventoryItemTitle>{title}</InventoryItemTitle>
+  </InventoryItem>
+)
+```
+
+
+
+
+
+
+
+---
+
+## `useFlag`
+
+### Summary 
+
+Hook that returns the given feature flag from FLAGS redux state.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `flag` | The feature flag to return |
+
+
+
+### Returns
+
+the boolean value of the requested feature flag or undefined
+
+
+---
+
+## `YAMLEditor`
+
+### Summary 
+
+A basic lazy loaded YAML editor with hover help and completion.
+
+
+
+### Example
+
+
+```tsx
+<React.Suspense fallback={<LoadingBox />}>
+  <YAMLEditor
+    value={code}
+  />
+</React.Suspense>
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `value` | String representing the yaml code to render. |
+| `options` | Monaco editor options. For more details, please, visit https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IStandaloneEditorConstructionOptions.html. |
+| `minHeight` | Minimum editor height in valid CSS height values. |
+| `showShortcuts` | Boolean to show shortcuts on top of the editor. |
+| `toolbarLinks` | Array of ReactNode rendered on the toolbar links section on top of the editor. |
+| `onChange` | Callback for on code change event. |
+| `onSave` | Callback called when the command CTRL / CMD + S is triggered. |
+| `ref` | React reference to `{ editor?: IStandaloneCodeEditor }`. Using the 'editor' property, you are able to access to all methods to control the editor. For more information, visit https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IStandaloneCodeEditor.html. |
+
+
+
+---
+
+## `ResourceYAMLEditor`
+
+### Summary 
+
+A lazy loaded YAML editor for Kubernetes resources with hover help and completion.<br/>The component use the YAMLEditor and add on top of it more functionality like<br/>resource update handling, alerts, save, cancel and reload buttons, accessibility and more.<br/>Unless onSave callback is provided, the resource update is automatically handled.<br/>It should be wrapped in a React.Suspense component.
+
+
+
+### Example
+
+
+```tsx
+<React.Suspense fallback={<LoadingBox />}>
+  <ResourceYAMLEditor
+    initialResource={resource}
+    header="Create resource"
+    onSave={(content) => updateResource(content)}
+  />
+</React.Suspense>
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `initialResource` | YAML/Object representing a resource to be shown by the editor. This prop is used only during the inital render |
+| `header` | Add a header on top of the YAML editor |
+| `onSave` | Callback for the Save button. Passing it will override the default update performed on the resource by the editor |
+
+
+
+---
+
+## `ResourceEventStream`
+
+### Summary 
+
+A component to show events related to a particular resource.
+
+
+
+### Example
+
+
+```tsx
+const [resource, loaded, loadError] = useK8sWatchResource(clusterResource);
+return <ResourceEventStream resource={resource} />
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `resource` | An object whose related events should be shown. |
+
+
+
+---
+
+## `usePrometheusPoll`
+
+### Summary 
+
+Sets up a poll to Prometheus for a single query.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `` |  {PrometheusEndpoint} props.endpoint - one of the PrometheusEndpoint (label, query, range, rules, targets) |
+| `` |  {string} [props.query] - (optional) Prometheus query string. If empty or undefined, polling is not started. |
+| `` |  {number} [props.delay] - (optional) polling delay interval (ms) |
+| `` |  {number} [props.endTime] - (optional) for QUERY_RANGE enpoint, end of the query range |
+| `` |  {number} [props.samples] - (optional) for QUERY_RANGE enpoint |
+| `` |  {number} [options.timespan] - (optional) for QUERY_RANGE enpoint |
+| `` |  {string} [options.namespace] - (optional) a search param to append |
+| `` |  {string} [options.timeout] - (optional) a search param to append |
+
+
+
+### Returns
+
+A tuple containing the query response, a boolean flag indicating whether the response has completed, and any errors encountered during the request or post-processing of the request
+
+
+---
+
+## `Timestamp`
+
+### Summary 
+
+A component to render timestamp.<br/>The timestamps are synchronized between invidual instances of the Timestamp component.<br/>The provided timestamp is formatted according to user locale.
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `timestamp` | the timestamp to render. Format is expected to be ISO 8601 (used by Kubernetes), epoch timestamp, or an instance of a Date. |
+| `simple` | render simple version of the component omitting icon and tooltip. |
+| `omitSuffix` | formats the date ommiting the suffix. |
+| `className` | additional class name for the component. |
+
+
+
+---
+
+## `useModal`
+
+### Summary 
+
+A hook to launch Modals.<br/><br/>```tsx<br/>const AppPage: React.FC = () => {<br/> const [launchModal] = useModal();<br/> const onClick = () => launchModal(ModalComponent);<br/> return (<br/>   <Button onClick={onClick}>Launch a Modal</Button><br/> )<br/>}<br/>```
+
+
+
+
+
+
+---
+
+## `ActionServiceProvider`
+
+### Summary 
+
+Component that allows to receive contributions from other plugins for the `console.action/provider` extension type.<br/>See docs: https://github.com/openshift/console/blob/master/frontend/packages/console-dynamic-plugin-sdk/docs/console-extensions.md#consoleactionprovider
+
+
+
+### Example
+
+
+```tsx
+   const context: ActionContext = { 'a-context-id': { dataFromDynamicPlugin } };
+
+   ...
+
+   <ActionServiceProvider context={context}>
+       {({ actions, options, loaded }) =>
+         loaded && (
+           <ActionMenu actions={actions} options={options} variant={ActionMenuVariant.DROPDOWN} />
+         )
+       }
+   </ActionServiceProvider>
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `context` | Object with contextId and optional plugin data |
+
+
+
+---
+
+## `NamespaceBar`
+
+### Summary 
+
+A component that renders a horizontal toolbar with a namespace dropdown menu in the leftmost position. Additional components can be passed in as children and will be rendered to the right of the namespace dropdown. This component is designed to be used at the top of the page. It should be used on pages where the user needs to be able to change the active namespace, such as on pages with k8s resources.
+
+
+
+### Example
+
+
+```tsx
+   const logNamespaceChange = (namespace) => console.log(`New namespace: ${namespace}`);
+
+   ...
+
+   <NamespaceBar onNamespaceChange={logNamespaceChange}>
+     <NamespaceBarApplicationSelector />
+   </NamespaceBar>
+   <Page>
+
+     ...
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `onNamespaceChange` | (optional) A function that is executed when a namespace option is selected. It accepts the new namespace in the form of a string as its only argument. The active namespace is updated automatically when an option is selected, but additional logic can be applied via this function. When the namespace is changed, the namespace parameter in the URL will be changed from the previous namespace to the newly selected namespace. |
+| `isDisabled` | (optional) A boolean flag that disables the namespace dropdown if set to true. This option only applies to the namespace dropdown and has no effect on child components. |
+| `children` | (optional) Additional elements to be rendered inside the toolbar to the right of the namespace dropdown. |
+
+
+
+---
+
+## `ErrorBoundaryFallbackPage`
+
+### Summary 
+
+Creates full page ErrorBoundaryFallbackPage component to display the "Oh no! Something went wrong."<br/>message along with the stack trace and other helpful debugging information. This is to be used in<br/>conjunction with an <ErrorBoundary> component.
+
+
+
+### Example
+
+
+ ```tsx
+ //in ErrorBoundary component
+  return (
+    if (this.state.hasError) {
+      return <ErrorBoundaryFallbackPage errorMessage={errorString} componentStack={componentStackString}
+       stack={stackTraceString} title={errorString}/>;
+    }
+
+    return this.props.children;
+  }
+ )
+```
+
+
+
+
+
+### Parameters
+
+| Parameter Name | Description |
+| -------------- | ----------- |
+| `errorMessage` | text description of the error message |
+| `componentStack` | component trace of the exception |
+| `stack` | stack trace of the exception |
+| `title` | title to render as the header of the error boundary page |
+
+
+
+---
+
+## `PluginDataTypes`
+
+### Summary 
+
+[For more details please refer the implementation](https://github.com/openshift/console/tree/release-4.12/frontend/packages/console-dynamic-plugin-sdk/src/api/common-types.ts)
+
+
+
+
+
 
 ---
 
@@ -1142,1023 +2173,6 @@ const Component: React.FC = () => {
 ### Returns
 
 A map where keys are as provided in initResouces and value has three properties data, loaded and error.
-
-
----
-
-## `consoleFetch`
-
-### Summary 
-
-A custom wrapper around `fetch` that adds console specific headers and allows for retries and timeouts.<br/>It also validates the response status code and throws appropriate error or logs out the user if required.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `url` | The URL to fetch |
-| `options` | The options to pass to fetch |
-| `timeout` | The timeout in milliseconds |
-
-
-
-### Returns
-
-A promise that resolves to the response
-
-
----
-
-## `consoleFetchJSON`
-
-### Summary 
-
-A custom wrapper around `fetch` that adds console specific headers and allows for retries and timeouts.<br/>It also validates the response status code and throws appropriate error or logs out the user if required.<br/>It returns the response as a JSON object.<br/>Uses consoleFetch internally.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `url` | The URL to fetch |
-| `method` | The HTTP method to use. Defaults to GET |
-| `options` | The options to pass to fetch |
-| `timeout` | The timeout in milliseconds |
-| `cluster` | The name of the cluster to make the request to. Defaults to the active cluster the user has selected |
-
-
-
-### Returns
-
-A promise that resolves to the response as JSON object.
-
-
----
-
-## `consoleFetchText`
-
-### Summary 
-
-A custom wrapper around `fetch` that adds console specific headers and allows for retries and timeouts.<br/>It also validates the response status code and throws appropriate error or logs out the user if required.<br/>It returns the response as a text.<br/>Uses consoleFetch internally.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `url` | The URL to fetch |
-| `options` | The options to pass to fetch |
-| `timeout` | The timeout in milliseconds |
-| `cluster` | The name of the cluster to make the request to. Defaults to the active cluster the user has selected |
-
-
-
-### Returns
-
-A promise that resolves to the response as text.
-
-
----
-
-## `getConsoleRequestHeaders`
-
-### Summary 
-
-A function that creates impersonation and multicluster related headers for API requests using current redux state.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `targetCluster` | override the current active cluster with the provided targetCluster |
-
-
-
-### Returns
-
-an object containing the appropriate impersonation and clustr requst headers, based on redux state
-
-
----
-
-## `k8sGetResource`
-
-### Summary 
-
-It fetches a resource from the cluster, based on the provided options.<br/>If the name is provided it returns one resource else it returns all the resources matching the model.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `options` | Which are passed as key-value pairs in the map |
-| `` |  options.model - k8s model |
-| `` |  options.name - The name of the resource, if not provided then it'll look for all the resources matching the model. |
-| `` |  options.ns - The namespace to look into, should not be specified for cluster-scoped resources. |
-| `` |  options.path - Appends as subpath if provided |
-| `` |  options.queryParams - The query parameters to be included in the URL. |
-| `` |  options.requestInit - The fetch init object to use. This can have request headers, method, redirect, etc. See more {@link https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.requestinit.html } |
-
-
-
-### Returns
-
-A promise that resolves to the response as JSON object with a resource if the name is provided<br/>else it returns all the resources matching the model. In case of failure, the promise gets rejected with HTTP error response.
-
-
----
-
-## `k8sCreateResource`
-
-### Summary 
-
-It creates a resource in the cluster, based on the provided options.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `options` | Which are passed as key-value pairs in the map |
-| `` |  options.model - k8s model |
-| `` |  options.data - payload for the resource to be created |
-| `` |  options.path - Appends as subpath if provided |
-| `` |  options.queryParams - The query parameters to be included in the URL. |
-
-
-
-### Returns
-
-A promise that resolves to the response of the resource created.<br/>In case of failure promise gets rejected with HTTP error response.
-
-
----
-
-## `k8sUpdateResource`
-
-### Summary 
-
-It updates the entire resource in the cluster, based on provided options.<br/>When a client needs to replace an existing resource entirely, they can use k8sUpdate.<br/>Alternatively can use k8sPatch to perform the partial update.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `options` | which are passed as key-value pair in the map |
-| `` |  options.model - k8s model |
-| `` |  options.data - payload for the k8s resource to be updated |
-| `` |  options.ns - namespace to look into, it should not be specified for cluster-scoped resources. |
-| `` |  options.name - resource name to be updated. |
-| `` |  options.path - Appends as subpath if provided |
-| `` |  options.queryParams - The query parameters to be included in the URL. |
-
-
-
-### Returns
-
-A promise that resolves to the response of the resource updated.<br/>In case of failure promise gets rejected with HTTP error response.
-
-
----
-
-## `k8sPatchResource`
-
-### Summary 
-
-It patches any resource in the cluster, based on provided options.<br/>When a client needs to perform the partial update, they can use k8sPatch.<br/>Alternatively can use k8sUpdate to replace an existing resource entirely.<br/>See more https://datatracker.ietf.org/doc/html/rfc6902
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `options` | Which are passed as key-value pairs in the map. |
-| `` |  options.model - k8s model |
-| `` |  options.resource - The resource to be patched. |
-| `` |  options.data - Only the data to be patched on existing resource with the operation, path, and value. |
-| `` |  options.path - Appends as subpath if provided. |
-| `` |  options.queryParams - The query parameters to be included in the URL. |
-
-
-
-### Returns
-
-A promise that resolves to the response of the resource patched.<br/>In case of failure promise gets rejected with HTTP error response.
-
-
----
-
-## `k8sDeleteResource`
-
-### Summary 
-
-It deletes resources from the cluster, based on the provided model, resource.<br/>The garbage collection works based on 'Foreground' | 'Background', can be configured with propagationPolicy property in provided model or passed in json.
-
-
-
-### Example
-
-
-```
-{ kind: 'DeleteOptions', apiVersion: 'v1', propagationPolicy }
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `options` | which are passed as key-value pair in the map. |
-| `` |  options.model - k8s model |
-| `` |  options.resource - The resource to be deleted. |
-| `` |  options.path - Appends as subpath if provided |
-| `` |  options.queryParams - The query parameters to be included in the URL. |
-| `` |  options.requestInit - The fetch init object to use. This can have request headers, method, redirect, etc. See more {@link https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.requestinit.html } |
-| `` |  options.json - Can control garbage collection of resources explicitly if provided else will default to model's "propagationPolicy". |
-
-
-
-### Returns
-
-A promise that resolves to the response of kind Status.<br/>In case of failure promise gets rejected with HTTP error response.
-
-
----
-
-## `k8sListResource`
-
-### Summary 
-
-Lists the resources as an array in the cluster, based on provided options.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `options` | Which are passed as key-value pairs in the map |
-| `` |  options.model - k8s model |
-| `` |  options.queryParams - The query parameters to be included in the URL and can pass label selector's as well with key "labelSelector". |
-| `` |  options.requestInit - The fetch init object to use. This can have request headers, method, redirect, etc. See more {@link https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.requestinit.html } |
-
-
-
-### Returns
-
-A promise that resolves to the response
-
-
----
-
-## `k8sListResourceItems`
-
-### Summary 
-
-Same interface as {@link k8sListResource} but returns the sub items.
-
-
-
-
-
-
----
-
-## `getAPIVersionForModel`
-
-### Summary 
-
-Provides apiVersion for a k8s model.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `model` | k8s model |
-
-
-
-### Returns
-
-The apiVersion for the model i.e `group/version`.
-
-
----
-
-## `getGroupVersionKindForResource`
-
-### Summary 
-
-Provides a group, version, and kind for a resource.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `resource` | k8s resource |
-
-
-
-### Returns
-
-The group, version, kind for the provided resource.<br/>If the resource does not have an API group, group "core" will be returned.<br/>If the resource has an invalid apiVersion then it'll throw Error.
-
-
----
-
-## `getGroupVersionKindForModel`
-
-### Summary 
-
-Provides a group, version, and kind for a k8s model.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `model` | k8s model |
-
-
-
-### Returns
-
-The group, version, kind for the provided model.<br/>If the model does not have an apiGroup, group "core" will be returned.
-
-
----
-
-## `StatusPopupSection`
-
-### Summary 
-
-Component that shows the status in a popup window. Helpful component for building `console.dashboards/overview/health/resource` extensions
-
-
-
-### Example
-
-
-```tsx
-  <StatusPopupSection
-    firstColumn={
-      <>
-        <span>{title}</span>
-        <span className="text-secondary">
-          My Example Item
-        </span>
-      </>
-    }
-    secondColumn='Status'
-  >
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `firstColumn` | values for first column of popup |
-| `secondColumn` | (optional) values for second column of popup |
-| `children` | (optional) children for the popup |
-
-
-
----
-
-## `StatusPopupItem`
-
-### Summary 
-
-Status element used in status popup; used in `StatusPopupSection`
-
-
-
-### Example
-
-
-```tsx
-<StatusPopupSection
-   firstColumn='Example'
-   secondColumn='Status'
->
-   <StatusPopupItem icon={healthStateMapping[MCGMetrics.state]?.icon}>
-      Complete
-   </StatusPopupItem>
-   <StatusPopupItem icon={healthStateMapping[RGWMetrics.state]?.icon}>
-       Pending
-   </StatusPopupItem>
-</StatusPopupSection>
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `value` | (optional) text value to display |
-| `icon` | (optional) icon to display |
-| `children` | child elements |
-
-
-
----
-
-## `Overview`
-
-### Summary 
-
-Creates a wrapper component for a dashboard
-
-
-
-### Example
-
-
-```tsx
-    <Overview>
-      <OverviewGrid mainCards={mainCards} leftCards={leftCards} rightCards={rightCards} />
-    </Overview>
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `className` | (optional) style class for div |
-| `children` | (optional) elements of the dashboard |
-
-
-
----
-
-## `OverviewGrid`
-
-### Summary 
-
-Creates a grid of card elements for a dashboard; used within `Overview`
-
-
-
-### Example
-
-
-```tsx
-    <Overview>
-      <OverviewGrid mainCards={mainCards} leftCards={leftCards} rightCards={rightCards} />
-    </Overview>
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `mainCards` | cards for grid |
-| `leftCards` | (optional) cards for left side of grid |
-| `rightCards` | (optional) cards for right side of grid |
-
-
-
----
-
-## `InventoryItem`
-
-### Summary 
-
-Creates an inventory card item
-
-
-
-### Example
-
-
-```tsx
-  return (
-    <InventoryItem>
-      <InventoryItemTitle>{title}</InventoryItemTitle>
-      <InventoryItemBody error={loadError}>
-        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
-      </InventoryItemBody>
-    </InventoryItem>
-  )
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `children` | elements to render inside the item |
-
-
-
----
-
-## `InventoryItemTitle`
-
-### Summary 
-
-Creates a title for an inventory card item; used within `InventoryItem`
-
-
-
-### Example
-
-
- ```tsx
-  return (
-    <InventoryItem>
-      <InventoryItemTitle>{title}</InventoryItemTitle>
-      <InventoryItemBody error={loadError}>
-        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
-      </InventoryItemBody>
-    </InventoryItem>
-  )
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `children` | elements to render inside the title |
-
-
-
----
-
-## `InventoryItemBody`
-
-### Summary 
-
-Creates the body of an inventory card; used within `InventoryCard` and can be used with `InventoryTitle`
-
-
-
-### Example
-
-
- ```tsx
-  return (
-    <InventoryItem>
-      <InventoryItemTitle>{title}</InventoryItemTitle>
-      <InventoryItemBody error={loadError}>
-        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
-      </InventoryItemBody>
-    </InventoryItem>
-  )
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `children` | elements to render inside the Inventory Card or title |
-| `error` | elements of the div |
-
-
-
----
-
-## `InventoryItemStatus`
-
-### Summary 
-
-Creates a count and icon for an inventory card with optional link address; used within `InventoryItemBody`
-
-
-
-### Example
-
-
- ```tsx
-  return (
-    <InventoryItem>
-      <InventoryItemTitle>{title}</InventoryItemTitle>
-      <InventoryItemBody error={loadError}>
-        {loaded && <InventoryItemStatus count={workerNodes.length} icon={<MonitoringIcon />} />}
-      </InventoryItemBody>
-    </InventoryItem>
-  )
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `count` | count for display |
-| `icon` | icon for display |
-| `linkTo` | (optional) link address |
-
-
-
----
-
-## `InventoryItemLoading`
-
-### Summary 
-
-Creates a skeleton container for when an inventory card is loading; used with `InventoryItem` and related components
-
-
-
-### Example
-
-
-```tsx
-if (loadError) {
-   title = <Link to={workerNodesLink}>{t('Worker Nodes')}</Link>;
-} else if (!loaded) {
-  title = <><InventoryItemLoading /><Link to={workerNodesLink}>{t('Worker Nodes')}</Link></>;
-}
-return (
-  <InventoryItem>
-    <InventoryItemTitle>{title}</InventoryItemTitle>
-  </InventoryItem>
-)
-```
-
-
-
-
-
-
-
----
-
-## `useFlag`
-
-### Summary 
-
-Hook that returns the given feature flag from FLAGS redux state.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `flag` | The feature flag to return |
-
-
-
-### Returns
-
-the boolean value of the requested feature flag or undefined
-
-
----
-
-## `YAMLEditor`
-
-### Summary 
-
-A basic lazy loaded YAML editor with hover help and completion.
-
-
-
-### Example
-
-
-```tsx
-<React.Suspense fallback={<LoadingBox />}>
-  <YAMLEditor
-    value={code}
-  />
-</React.Suspense>
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `value` | String representing the yaml code to render. |
-| `options` | Monaco editor options. For more details, please, visit https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IStandaloneEditorConstructionOptions.html. |
-| `minHeight` | Minimum editor height in valid CSS height values. |
-| `showShortcuts` | Boolean to show shortcuts on top of the editor. |
-| `toolbarLinks` | Array of ReactNode rendered on the toolbar links section on top of the editor. |
-| `onChange` | Callback for on code change event. |
-| `onSave` | Callback called when the command CTRL / CMD + S is triggered. |
-| `ref` | React reference to `{ editor?: IStandaloneCodeEditor }`. Using the 'editor' property, you are able to access to all methods to control the editor. For more information, visit https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IStandaloneCodeEditor.html. |
-
-
-
----
-
-## `ResourceYAMLEditor`
-
-### Summary 
-
-A lazy loaded YAML editor for Kubernetes resources with hover help and completion.<br/>The component use the YAMLEditor and add on top of it more functionality like<br/>resource update handling, alerts, save, cancel and reload buttons, accessibility and more.<br/>Unless onSave callback is provided, the resource update is automatically handled.<br/>It should be wrapped in a React.Suspense component.
-
-
-
-### Example
-
-
-```tsx
-<React.Suspense fallback={<LoadingBox />}>
-  <ResourceYAMLEditor
-    initialResource={resource}
-    header="Create resource"
-    onSave={(content) => updateResource(content)}
-  />
-</React.Suspense>
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `initialResource` | YAML/Object representing a resource to be shown by the editor. This prop is used only during the inital render |
-| `header` | Add a header on top of the YAML editor |
-| `onSave` | Callback for the Save button. Passing it will override the default update performed on the resource by the editor |
-
-
-
----
-
-## `ResourceEventStream`
-
-### Summary 
-
-A component to show events related to a particular resource.
-
-
-
-### Example
-
-
-```tsx
-const [resource, loaded, loadError] = useK8sWatchResource(clusterResource);
-return <ResourceEventStream resource={resource} />
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `resource` | An object whose related events should be shown. |
-
-
-
----
-
-## `usePrometheusPoll`
-
-### Summary 
-
-Sets up a poll to Prometheus for a single query.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `` |  {PrometheusEndpoint} props.endpoint - one of the PrometheusEndpoint (label, query, range, rules, targets) |
-| `` |  {string} [props.query] - (optional) Prometheus query string. If empty or undefined, polling is not started. |
-| `` |  {number} [props.delay] - (optional) polling delay interval (ms) |
-| `` |  {number} [props.endTime] - (optional) for QUERY_RANGE enpoint, end of the query range |
-| `` |  {number} [props.samples] - (optional) for QUERY_RANGE enpoint |
-| `` |  {number} [options.timespan] - (optional) for QUERY_RANGE enpoint |
-| `` |  {string} [options.namespace] - (optional) a search param to append |
-| `` |  {string} [options.timeout] - (optional) a search param to append |
-
-
-
-### Returns
-
-A tuple containing the query response, a boolean flag indicating whether the response has completed, and any errors encountered during the request or post-processing of the request
-
-
----
-
-## `Timestamp`
-
-### Summary 
-
-A component to render timestamp.<br/>The timestamps are synchronized between invidual instances of the Timestamp component.<br/>The provided timestamp is formatted according to user locale.
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `timestamp` | the timestamp to render. Format is expected to be ISO 8601 (used by Kubernetes), epoch timestamp, or an instance of a Date. |
-| `simple` | render simple version of the component omitting icon and tooltip. |
-| `omitSuffix` | formats the date ommiting the suffix. |
-| `className` | additional class name for the component. |
-
-
-
----
-
-## `useModal`
-
-### Summary 
-
-A hook to launch Modals.<br/><br/>```tsx<br/>const AppPage: React.FC = () => {<br/> const [launchModal] = useModal();<br/> const onClick = () => launchModal(ModalComponent);<br/> return (<br/>   <Button onClick={onClick}>Launch a Modal</Button><br/> )<br/>}<br/>```
-
-
-
-
-
-
----
-
-## `ActionServiceProvider`
-
-### Summary 
-
-Component that allows to receive contributions from other plugins for the `console.action/provider` extension type.<br/>See docs: https://github.com/openshift/console/blob/master/frontend/packages/console-dynamic-plugin-sdk/docs/console-extensions.md#consoleactionprovider
-
-
-
-### Example
-
-
-```tsx
-   const context: ActionContext = { 'a-context-id': { dataFromDynamicPlugin } };
-
-   ...
-
-   <ActionServiceProvider context={context}>
-       {({ actions, options, loaded }) =>
-         loaded && (
-           <ActionMenu actions={actions} options={options} variant={ActionMenuVariant.DROPDOWN} />
-         )
-       }
-   </ActionServiceProvider>
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `context` | Object with contextId and optional plugin data |
-
-
-
----
-
-## `NamespaceBar`
-
-### Summary 
-
-A component that renders a horizontal toolbar with a namespace dropdown menu in the leftmost position. Additional components can be passed in as children and will be rendered to the right of the namespace dropdown. This component is designed to be used at the top of the page. It should be used on pages where the user needs to be able to change the active namespace, such as on pages with k8s resources.
-
-
-
-### Example
-
-
-```tsx
-   const logNamespaceChange = (namespace) => console.log(`New namespace: ${namespace}`);
-
-   ...
-
-   <NamespaceBar onNamespaceChange={logNamespaceChange}>
-     <NamespaceBarApplicationSelector />
-   </NamespaceBar>
-   <Page>
-
-     ...
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `onNamespaceChange` | (optional) A function that is executed when a namespace option is selected. It accepts the new namespace in the form of a string as its only argument. The active namespace is updated automatically when an option is selected, but additional logic can be applied via this function. When the namespace is changed, the namespace parameter in the URL will be changed from the previous namespace to the newly selected namespace. |
-| `isDisabled` | (optional) A boolean flag that disables the namespace dropdown if set to true. This option only applies to the namespace dropdown and has no effect on child components. |
-| `children` | (optional) Additional elements to be rendered inside the toolbar to the right of the namespace dropdown. |
-
-
-
----
-
-## `ErrorBoundaryFallbackPage`
-
-### Summary 
-
-Creates full page ErrorBoundaryFallbackPage component to display the "Oh no! Something went wrong."<br/>message along with the stack trace and other helpful debugging information. This is to be used in<br/>conjunction with an <ErrorBoundary> component.
-
-
-
-### Example
-
-
- ```tsx
- //in ErrorBoundary component
-  return (
-    if (this.state.hasError) {
-      return <ErrorBoundaryFallbackPage errorMessage={errorString} componentStack={componentStackString}
-       stack={stackTraceString} title={errorString}/>;
-    }
-
-    return this.props.children;
-  }
- )
-```
-
-
-
-
-
-### Parameters
-
-| Parameter Name | Description |
-| -------------- | ----------- |
-| `errorMessage` | text description of the error message |
-| `componentStack` | component trace of the exception |
-| `stack` | stack trace of the exception |
-| `title` | title to render as the header of the error boundary page |
-
 
 
 ---

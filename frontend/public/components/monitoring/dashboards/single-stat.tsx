@@ -82,17 +82,32 @@ const SingleStat: React.FC<Props> = ({
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
-  const tick = () =>
-    safeFetch(
-      getPrometheusURL(
-        { endpoint: PrometheusEndpoint.QUERY, query, namespace },
-        customDataSource?.basePath,
-      ),
-    )
+  const getURL = () => {
+    const url = customDataSource?.basePath
+      ? getPrometheusURL(
+          { endpoint: PrometheusEndpoint.QUERY, query, namespace },
+          customDataSource?.basePath,
+        )
+      : getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace });
+    if (!url) {
+      return;
+    }
+    return url;
+  };
+
+  const tick = () => {
+    if (!getURL()) {
+      return;
+    }
+    safeFetch(getURL())
       .then((response: PrometheusResponse) => {
-        setError(undefined);
-        setIsLoading(false);
-        setValue(_.get(response, 'data.result[0].value[1]'));
+        if (response) {
+          setValue(_.get(response, 'data.result[0].value[1]'));
+          setError(undefined);
+          setIsLoading(false);
+        } else {
+          throw new Error('JZ');
+        }
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
@@ -101,6 +116,7 @@ const SingleStat: React.FC<Props> = ({
           setValue(undefined);
         }
       });
+  };
 
   usePoll(tick, pollInterval, query);
 
