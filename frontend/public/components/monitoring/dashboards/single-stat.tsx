@@ -82,24 +82,18 @@ const SingleStat: React.FC<Props> = ({
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
-  const getURL = () => {
-    const url = customDataSource?.basePath
-      ? getPrometheusURL(
-          { endpoint: PrometheusEndpoint.QUERY, query, namespace },
-          customDataSource?.basePath,
-        )
-      : getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace });
+  const url = customDataSource?.basePath
+    ? getPrometheusURL(
+        { endpoint: PrometheusEndpoint.QUERY, query, namespace },
+        customDataSource?.basePath,
+      )
+    : getPrometheusURL({ endpoint: PrometheusEndpoint.QUERY, query, namespace });
+
+  const tick = () => {
     if (!url) {
       return;
     }
-    return url;
-  };
-
-  const tick = () => {
-    if (!getURL()) {
-      return;
-    }
-    safeFetch(getURL())
+    safeFetch(url)
       .then((response: PrometheusResponse) => {
         if (response) {
           setValue(_.get(response, 'data.result[0].value[1]'));
