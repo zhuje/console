@@ -70,6 +70,13 @@ import {
   getAllVariables,
 } from './monitoring-dashboard-utils';
 
+import { useExtensions } from '@console/plugin-sdk/src';
+import {
+  isDataSource,
+  DataSource as DataSourceExtension,
+  CustomDataSource,
+} from '@console/dynamic-plugin-sdk/src/extensions/dashboard-data-source';
+
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
 const isIntervalVariable = (itemKey: string): boolean =>
@@ -212,6 +219,20 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const variable = variables.toJS()[name];
   const query = evaluateTemplate(variable.query, variables, timespan);
 
+  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
+  const dataSourceName = variable?.datasource?.name;
+  const extensions = useExtensions<DataSourceExtension>(isDataSource);
+
+  React.useEffect(() => {
+    if (dataSourceName) {
+      extensions.forEach(async (extension) => {
+        const getDataSource = await extension.properties.getDataSource();
+        const dataSource = await getDataSource(dataSourceName);
+        setCustomDataSource(dataSource);
+      });
+    }
+  }, [extensions, dataSourceName]);
+
   const dispatch = useDispatch();
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
@@ -225,14 +246,25 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       // be converted to use that instead
       const prometheusQuery = query.replace(/label_values\((.*), (.*)\)/, 'count($1) by ($2)');
 
-      const url = getPrometheusURL({
+      const prometheusProps = {
         endpoint: PrometheusEndpoint.QUERY_RANGE,
         query: prometheusQuery,
         samples: DEFAULT_GRAPH_SAMPLES,
         timeout: '60s',
         timespan,
         namespace,
-      });
+      };
+      let url = undefined;
+
+      if (!customDataSource) {
+        url = getPrometheusURL(prometheusProps);
+      } else if (customDataSource?.basePath) {
+        url = getPrometheusURL(prometheusProps, customDataSource.basePath);
+      }
+
+      if (!url) {
+        return;
+      }
 
       dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
 
@@ -249,7 +281,7 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
           }
         });
     }
-  }, [activePerspective, dispatch, name, namespace, query, safeFetch, timespan]);
+  }, [activePerspective, customDataSource, dispatch, name, namespace, query, safeFetch, timespan]);
 
   React.useEffect(() => {
     if (variable.value && variable.value !== getQueryArgument(name)) {
@@ -509,6 +541,25 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
 
+  const [dataSourceInfoLoading, setDataSourceInfoLoading] = React.useState<boolean>(true);
+  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
+  const dataSourceName = panel.datasource?.name;
+  const extensions = useExtensions<DataSourceExtension>(isDataSource);
+
+  React.useEffect(() => {
+    if (!dataSourceName) {
+      setDataSourceInfoLoading(false);
+    } else {
+      setDataSourceInfoLoading(true);
+      extensions.forEach(async (extension) => {
+        const getDataSource = await extension.properties.getDataSource();
+        const dataSource = await getDataSource(dataSourceName);
+        setCustomDataSource(dataSource);
+      });
+      setDataSourceInfoLoading(false);
+    }
+  }, [extensions, dataSourceName]);
+
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
       const title = panel.targets?.[i]?.legendFormat;
@@ -545,7 +596,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     return null;
   }
   const queries = rawQueries.map((expr) => evaluateTemplate(expr, variables, timespan));
-  const isLoading = _.some(queries, _.isUndefined);
+  const isLoading = _.some(queries, _.isUndefined) && dataSourceInfoLoading;
 
   const panelClassModifier = getPanelClassModifier(panel);
 
@@ -581,7 +632,12 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
             ) : (
               <>
                 {panel.type === 'grafana-piechart-panel' && (
-                  <BarChart pollInterval={pollInterval} query={queries[0]} namespace={namespace} />
+                  <BarChart
+                    pollInterval={pollInterval}
+                    query={queries[0]}
+                    namespace={namespace}
+                    customDataSource={customDataSource}
+                  />
                 )}
                 {panel.type === 'graph' && (
                   <Graph
@@ -593,6 +649,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     units={panel.yaxes?.[0]?.format}
                     onZoomHandle={handleZoom}
                     namespace={namespace}
+                    customDataSource={customDataSource}
                   />
                 )}
                 {(panel.type === 'singlestat' || panel.type === 'gauge') && (
@@ -601,6 +658,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     query={queries[0]}
                     namespace={namespace}
+                    customDataSource={customDataSource}
                   />
                 )}
                 {panel.type === 'table' && (
@@ -609,6 +667,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
                     pollInterval={pollInterval}
                     queries={queries}
                     namespace={namespace}
+                    customDataSource={customDataSource}
                   />
                 )}
               </>
