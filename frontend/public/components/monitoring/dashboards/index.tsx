@@ -526,6 +526,8 @@ const getPanelClassModifier = (panel: Panel): string => {
 };
 
 const Card: React.FC<CardProps> = React.memo(({ panel }) => {
+  const { t } = useTranslation();
+
   const namespace = React.useContext(NamespaceContext);
   const activePerspective = getActivePerspective(namespace);
   const pollInterval = useSelector(({ observe }: RootState) =>
@@ -541,24 +543,30 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const ref = React.useRef();
   const [, wasEverVisible] = useIsVisible(ref);
 
+  const [isError, setIsError] = React.useState<boolean>(false);
   const [dataSourceInfoLoading, setDataSourceInfoLoading] = React.useState<boolean>(true);
   const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
   const dataSourceName = panel.datasource?.name;
   const extensions = useExtensions<DataSourceExtension>(isDataSource);
+  const extension = extensions.find((ext) => ext.pluginName === 'dashboards-datasource-plugin');
 
   React.useEffect(() => {
-    if (!dataSourceName) {
-      setDataSourceInfoLoading(false);
-    } else {
-      setDataSourceInfoLoading(true);
-      extensions.forEach(async (extension) => {
+    const fetchData = async () => {
+      if (!dataSourceName) {
+        setDataSourceInfoLoading(false);
+        setCustomDataSource(null);
+      } else {
+        setDataSourceInfoLoading(true);
         const getDataSource = await extension.properties.getDataSource();
         const dataSource = await getDataSource(dataSourceName);
         setCustomDataSource(dataSource);
-      });
-      setDataSourceInfoLoading(false);
-    }
-  }, [extensions, dataSourceName]);
+        setDataSourceInfoLoading(false);
+      }
+    };
+    fetchData().catch(() => {
+      setIsError(true);
+    });
+  }, [extensions, dataSourceName, extension.properties]);
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -596,7 +604,8 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     return null;
   }
   const queries = rawQueries.map((expr) => evaluateTemplate(expr, variables, timespan));
-  const isLoading = _.some(queries, _.isUndefined) && dataSourceInfoLoading;
+  const isLoading =
+    (_.some(queries, _.isUndefined) && dataSourceInfoLoading) || customDataSource === undefined;
 
   const panelClassModifier = getPanelClassModifier(panel);
 
@@ -611,70 +620,81 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     <div
       className={`monitoring-dashboards__panel monitoring-dashboards__panel--${panelClassModifier}`}
     >
-      <PFCard
-        className={classNames('monitoring-dashboards__card', {
-          'co-overview-card--gradient': panel.type === 'grafana-piechart-panel',
-        })}
-        data-test={`${panel.title.toLowerCase().replace(/\s+/g, '-')}-chart`}
-      >
-        <CardHeader className="monitoring-dashboards__card-header">
-          <CardTitle>{panel.title}</CardTitle>
-          <CardActions className="co-overview-card__actions">
-            {!isLoading && <QueryBrowserLink queries={queries} />}
-          </CardActions>
-        </CardHeader>
-        <CardBody className="co-dashboard-card__body--dashboard">
-          <div className="monitoring-dashboards__card-body-content" ref={ref}>
-            {isLoading || !wasEverVisible ? (
-              <div className={panel.type === 'graph' ? 'query-browser__wrapper' : ''}>
-                <LoadingInline />
-              </div>
-            ) : (
-              <>
-                {panel.type === 'grafana-piechart-panel' && (
-                  <BarChart
-                    pollInterval={pollInterval}
-                    query={queries[0]}
-                    namespace={namespace}
-                    customDataSource={customDataSource}
-                  />
-                )}
-                {panel.type === 'graph' && (
-                  <Graph
-                    formatSeriesTitle={formatSeriesTitle}
-                    isStack={panel.stack}
-                    pollInterval={pollInterval}
-                    queries={queries}
-                    showLegend={panel.legend?.show}
-                    units={panel.yaxes?.[0]?.format}
-                    onZoomHandle={handleZoom}
-                    namespace={namespace}
-                    customDataSource={customDataSource}
-                  />
-                )}
-                {(panel.type === 'singlestat' || panel.type === 'gauge') && (
-                  <SingleStat
-                    panel={panel}
-                    pollInterval={pollInterval}
-                    query={queries[0]}
-                    namespace={namespace}
-                    customDataSource={customDataSource}
-                  />
-                )}
-                {panel.type === 'table' && (
-                  <Table
-                    panel={panel}
-                    pollInterval={pollInterval}
-                    queries={queries}
-                    namespace={namespace}
-                    customDataSource={customDataSource}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        </CardBody>
-      </PFCard>
+      {isError ? (
+        <PFCard>
+          <CardHeader className="monitoring-dashboards__card-header">
+            <CardTitle>{panel.title}</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <RedExclamationCircleIcon /> {t('public~Error loading card')}
+          </CardBody>
+        </PFCard>
+      ) : (
+        <PFCard
+          className={classNames('monitoring-dashboards__card', {
+            'co-overview-card--gradient': panel.type === 'grafana-piechart-panel',
+          })}
+          data-test={`${panel.title.toLowerCase().replace(/\s+/g, '-')}-chart`}
+        >
+          <CardHeader className="monitoring-dashboards__card-header">
+            <CardTitle>{panel.title}</CardTitle>
+            <CardActions className="co-overview-card__actions">
+              {!isLoading && <QueryBrowserLink queries={queries} />}
+            </CardActions>
+          </CardHeader>
+          <CardBody className="co-dashboard-card__body--dashboard">
+            <div className="monitoring-dashboards__card-body-content" ref={ref}>
+              {isLoading || !wasEverVisible ? (
+                <div className={panel.type === 'graph' ? 'query-browser__wrapper' : ''}>
+                  <LoadingInline />
+                </div>
+              ) : (
+                <>
+                  {panel.type === 'grafana-piechart-panel' && (
+                    <BarChart
+                      pollInterval={pollInterval}
+                      query={queries[0]}
+                      namespace={namespace}
+                      customDataSource={customDataSource}
+                    />
+                  )}
+                  {panel.type === 'graph' && (
+                    <Graph
+                      formatSeriesTitle={formatSeriesTitle}
+                      isStack={panel.stack}
+                      pollInterval={pollInterval}
+                      queries={queries}
+                      showLegend={panel.legend?.show}
+                      units={panel.yaxes?.[0]?.format}
+                      onZoomHandle={handleZoom}
+                      namespace={namespace}
+                      customDataSource={customDataSource}
+                    />
+                  )}
+                  {(panel.type === 'singlestat' || panel.type === 'gauge') && (
+                    <SingleStat
+                      panel={panel}
+                      pollInterval={pollInterval}
+                      query={queries[0]}
+                      namespace={namespace}
+                      customDataSource={customDataSource}
+                    />
+                  )}
+                  {panel.type === 'table' && (
+                    <Table
+                      panel={panel}
+                      pollInterval={pollInterval}
+                      queries={queries}
+                      namespace={namespace}
+                      customDataSource={customDataSource}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </CardBody>
+        </PFCard>
+      )}
     </div>
   );
 });
