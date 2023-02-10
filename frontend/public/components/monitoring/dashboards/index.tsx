@@ -219,25 +219,27 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
   const variable = variables.toJS()[name];
   const query = evaluateTemplate(variable.query, variables, timespan);
 
-  const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
-  const dataSourceName = variable?.datasource?.name;
-  const extensions = useExtensions<DataSourceExtension>(isDataSource);
-
-  React.useEffect(() => {
-    if (dataSourceName) {
-      extensions.forEach(async (extension) => {
-        const getDataSource = await extension.properties.getDataSource();
-        const dataSource = await getDataSource(dataSourceName);
-        setCustomDataSource(dataSource);
-      });
-    }
-  }, [extensions, dataSourceName]);
-
   const dispatch = useDispatch();
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
 
   const [isError, setIsError] = React.useState(false);
+
+  const dataSourceName = variable?.datasource?.name;
+  const extensions = useExtensions<DataSourceExtension>(isDataSource);
+  const extension = extensions.find((ext) => ext.pluginName === 'dashboards-datasource-plugin');
+
+  const getURL = React.useCallback(
+    async (prometheusProps) => {
+      if (!dataSourceName) {
+        return getPrometheusURL(prometheusProps);
+      }
+      const getDataSource = await extension.properties.getDataSource();
+      const dataSource = await getDataSource(dataSourceName);
+      return getPrometheusURL(prometheusProps, dataSource?.basePath);
+    },
+    [dataSourceName, extension],
+  );
 
   React.useEffect(() => {
     if (query) {
@@ -254,34 +256,23 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
         timespan,
         namespace,
       };
-      let url = undefined;
 
-      if (!customDataSource) {
-        url = getPrometheusURL(prometheusProps);
-      } else if (customDataSource?.basePath) {
-        url = getPrometheusURL(prometheusProps, customDataSource.basePath);
-      }
-
-      if (!url) {
-        return;
-      }
-
-      dispatch(dashboardsPatchVariable(name, { isLoading: true }, activePerspective));
-
-      safeFetch(url)
-        .then(({ data }) => {
-          setIsError(false);
-          const newOptions = _.flatMap(data?.result, ({ metric }) => _.values(metric)).sort();
-          dispatch(dashboardsVariableOptionsLoaded(name, newOptions, activePerspective));
-        })
-        .catch((err) => {
-          dispatch(dashboardsPatchVariable(name, { isLoading: false }, activePerspective));
-          if (err.name !== 'AbortError') {
-            setIsError(true);
-          }
-        });
+      getURL(prometheusProps).then((url) =>
+        safeFetch(url)
+          .then(({ data }) => {
+            setIsError(false);
+            const newOptions = _.flatMap(data?.result, ({ metric }) => _.values(metric)).sort();
+            dispatch(dashboardsVariableOptionsLoaded(name, newOptions, activePerspective));
+          })
+          .catch((err) => {
+            dispatch(dashboardsPatchVariable(name, { isLoading: false }, activePerspective));
+            if (err.name !== 'AbortError') {
+              setIsError(true);
+            }
+          }),
+      );
     }
-  }, [activePerspective, customDataSource, dispatch, name, namespace, query, safeFetch, timespan]);
+  }, [activePerspective, dispatch, getURL, name, namespace, query, safeFetch, timespan]);
 
   React.useEffect(() => {
     if (variable.value && variable.value !== getQueryArgument(name)) {
