@@ -3,6 +3,7 @@ import { Extension, ExtensionDeclaration, CodeRef } from '../types';
 export type DataSource = ExtensionDeclaration<
   'console.dashboards/datasource',
   {
+    contextId: string;
     /** Returns a extension function that provides a custom data source object */
     getDataSource: CodeRef<(dataSourceID: string) => Promise<CustomDataSource>>;
   }
