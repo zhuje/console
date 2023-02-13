@@ -225,25 +225,28 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
 
   const [isError, setIsError] = React.useState(false);
 
-  // const dataSourceName = variable?.datasource?.name;
-  const dataSourceName = 'test';
+  const dataSourceName = variable?.datasource?.name;
   const extensions = useExtensions<DataSourceExtension>(isDataSource);
+  const hasExtensions = !_.isEmpty(extensions);
 
   const getURL = React.useCallback(
     async (prometheusProps) => {
-      if (!dataSourceName) {
-        return getPrometheusURL(prometheusProps);
-      } else if (!_.isEmpty(extensions)) {
-        const extension = extensions.find(
-          (ext) => ext?.properties?.contextId === 'monitoring-dashboards',
-        );
-        const getDataSource = await extension?.properties?.getDataSource();
-        const dataSource = await getDataSource(dataSourceName);
-        return getPrometheusURL(prometheusProps, dataSource?.basePath);
+      try {
+        if (!dataSourceName) {
+          return getPrometheusURL(prometheusProps);
+        } else if (hasExtensions) {
+          const extension = extensions.find(
+            (ext) => ext?.properties?.contextId === 'monitoring-dashboards',
+          );
+          const getDataSource = await extension?.properties?.getDataSource();
+          const dataSource = await getDataSource(dataSourceName);
+          return getPrometheusURL(prometheusProps, dataSource?.basePath);
+        }
+      } catch (error) {
+        setIsError(true);
       }
-      setIsError(true);
     },
-    [dataSourceName, extensions],
+    [dataSourceName, extensions, hasExtensions],
   );
 
   React.useEffect(() => {
@@ -542,16 +545,16 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const [isError, setIsError] = React.useState<boolean>(false);
   const [dataSourceInfoLoading, setDataSourceInfoLoading] = React.useState<boolean>(true);
   const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
-  // const dataSourceName = panel.datasource?.name;
-  const dataSourceName = 'test';
+  const dataSourceName = panel.datasource?.name;
   const extensions = useExtensions<DataSourceExtension>(isDataSource);
+  const hasExtensions = !_.isEmpty(extensions);
 
   React.useEffect(() => {
     const getCustomDataSource = async () => {
       if (!dataSourceName) {
         setDataSourceInfoLoading(false);
         setCustomDataSource(null);
-      } else if (!_.isEmpty(extensions)) {
+      } else if (hasExtensions) {
         setDataSourceInfoLoading(true);
         const extension = extensions.find(
           (ext) => ext?.properties?.contextId === 'monitoring-dashboards',
@@ -568,7 +571,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     getCustomDataSource().catch(() => {
       setIsError(true);
     });
-  }, [extensions, dataSourceName]);
+  }, [extensions, dataSourceName, hasExtensions]);
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
@@ -623,14 +626,18 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
       className={`monitoring-dashboards__panel monitoring-dashboards__panel--${panelClassModifier}`}
     >
       {isError ? (
-        <PFCard>
-          <CardHeader className="monitoring-dashboards__error-card-header">
+        <PFCard
+          className={classNames('monitoring-dashboards__card', {
+            'co-overview-card--gradient': panel.type === 'grafana-piechart-panel',
+          })}
+          data-test={`${panel.title.toLowerCase().replace(/\s+/g, '-')}-chart`}
+        >
+          <CardHeader className="monitoring-dashboards__card-header">
             <CardTitle>{panel.title}</CardTitle>
           </CardHeader>
-          <CardBody>
+          <CardBody className="co-dashboard-card__body--dashboard">
             <>
-              {' '}
-              <RedExclamationCircleIcon /> {t('public~Error loading card')}{' '}
+              <RedExclamationCircleIcon /> {t('public~Error loading card')}
             </>
           </CardBody>
         </PFCard>
