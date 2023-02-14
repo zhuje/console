@@ -225,28 +225,28 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
 
   const [isError, setIsError] = React.useState(false);
 
-  const dataSourceName = variable?.datasource?.name;
+  const customDataSourceName = variable?.datasource?.name;
   const extensions = useExtensions<DataSourceExtension>(isDataSource);
   const hasExtensions = !_.isEmpty(extensions);
 
   const getURL = React.useCallback(
     async (prometheusProps) => {
       try {
-        if (!dataSourceName) {
+        if (!customDataSourceName) {
           return getPrometheusURL(prometheusProps);
         } else if (hasExtensions) {
           const extension = extensions.find(
             (ext) => ext?.properties?.contextId === 'monitoring-dashboards',
           );
           const getDataSource = await extension?.properties?.getDataSource();
-          const dataSource = await getDataSource(dataSourceName);
+          const dataSource = await getDataSource(customDataSourceName);
           return getPrometheusURL(prometheusProps, dataSource?.basePath);
         }
       } catch (error) {
         setIsError(true);
       }
     },
-    [dataSourceName, extensions, hasExtensions],
+    [customDataSourceName, extensions, hasExtensions],
   );
 
   React.useEffect(() => {
@@ -545,13 +545,13 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const [isError, setIsError] = React.useState<boolean>(false);
   const [dataSourceInfoLoading, setDataSourceInfoLoading] = React.useState<boolean>(true);
   const [customDataSource, setCustomDataSource] = React.useState<CustomDataSource>(undefined);
-  const dataSourceName = panel.datasource?.name;
+  const customDataSourceName = panel.datasource?.name;
   const extensions = useExtensions<DataSourceExtension>(isDataSource);
   const hasExtensions = !_.isEmpty(extensions);
 
   React.useEffect(() => {
     const getCustomDataSource = async () => {
-      if (!dataSourceName) {
+      if (!customDataSourceName) {
         setDataSourceInfoLoading(false);
         setCustomDataSource(null);
       } else if (hasExtensions) {
@@ -560,7 +560,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
           (ext) => ext?.properties?.contextId === 'monitoring-dashboards',
         );
         const getDataSource = await extension?.properties?.getDataSource();
-        const dataSource = await getDataSource(dataSourceName);
+        const dataSource = await getDataSource(customDataSourceName);
         setCustomDataSource(dataSource);
         setDataSourceInfoLoading(false);
       } else {
@@ -571,7 +571,7 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     getCustomDataSource().catch(() => {
       setIsError(true);
     });
-  }, [extensions, dataSourceName, hasExtensions]);
+  }, [extensions, customDataSourceName, hasExtensions]);
 
   const formatSeriesTitle = React.useCallback(
     (labels, i) => {
