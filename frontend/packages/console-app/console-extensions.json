@@ -1314,6 +1314,35 @@
     }
   },
   {
+    "type": "console.navigation/href",
+    "flags": {
+      "required": ["PROMETHEUS", "MONITORING", "CAN_GET_NS"]
+    },
+    "properties": {
+      "perspective": "admin",
+      "section": "observe",
+      "id": "monitoringperses",
+      "insertAfter": "monitoringtargets",
+      "name": "%console-app~Perses-Dashboards%",
+      "href": "/monitoring/perses-dashboards"
+    }
+  },
+  {
+    "type": "console.tab/horizontalNav",
+    "properties": {
+      "page": {
+        "name": "Example Tab",
+        "href": "example"
+      },
+      "model": {
+        "group": "core",
+        "version": "v1",
+        "kind": "Pod"
+      },
+      "component": { "$codeRef": "ExampleTab" }
+    }
+  },
+  {
     "type": "console.dashboards/overview/health/resource",
     "properties": {
       "title": "%console-app~Dynamic Plugins%",

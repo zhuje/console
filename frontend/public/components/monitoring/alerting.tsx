@@ -107,6 +107,7 @@ import { QueryBrowserPage, ToggleGraph } from './metrics';
 import { FormatSeriesTitle, QueryBrowser } from './query-browser';
 import { CreateSilence, EditSilence } from './silence-form';
 import { TargetsUI } from './targets';
+import { PersesDashboard } from './perses';
 import { Alerts, AlertSource, MonitoringResource, Silences } from './types';
 import {
   alertDescription,
@@ -2112,6 +2113,7 @@ export const MonitoringUI = () => (
     <Route path="/monitoring/query-browser" exact component={QueryBrowserPage} />
     <Route path="/monitoring/silences/~new" exact component={CreateSilence} />
     <Route path="/monitoring/targets" component={TargetsUI} />
+    <Route path="/monitoring/perses-dashboards" exact component={PersesDashboard} />
     <Route component={PollerPages} />
   </Switch>
 );

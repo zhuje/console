@@ -35,6 +35,8 @@
   "consolePlugin": {
     "entry": "src/plugin.tsx",
     "exposedModules": {
+      "ExamplePage": "src/components/ExamplePage",
+      "ExampleTab": "src/components/ExampleTab",
       "tourContext": "src/components/tour/tour-context.ts",
       "quickStartContext": "src/components/quick-starts/utils/quick-start-context.tsx",
       "quickStartConfiguration": "src/components/quick-starts/QuickStartConfiguration.tsx",
