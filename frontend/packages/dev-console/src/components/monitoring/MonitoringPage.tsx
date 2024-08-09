@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
-import MonitoringDashboardsPage from '@console/internal/components/monitoring/dashboards';
+// import MonitoringDashboardsPage from '@console/internal/components/monitoring/dashboards';
 import { withStartGuide } from '@console/internal/components/start-guide';
 import {
   HorizontalNav,
@@ -19,6 +19,37 @@ import ConnectedMonitoringMetrics from './metrics/MonitoringMetrics';
 
 export const MONITORING_ALL_NS_PAGE_URI = '/dev-monitoring/all-namespaces';
 
+// test
+import { getURLSearchParams } from '@console/internal/components/utils';
+import * as _ from 'lodash-es';
+
+
+export const isMonitoringPluginEnabled = () => {
+  const allPluginNames = window.SERVER_FLAGS.consolePlugins;
+  const disabledPlugins = getURLSearchParams()['disable-plugins'];
+
+  if (disabledPlugins === '') {
+    return [];
+  } else if (!disabledPlugins) {
+    return allPluginNames;
+  }
+
+  const disabledPluginNames = _.compact(disabledPlugins.split(','));
+  const dynamicPluginNames = allPluginNames.filter(
+    (pluginName) => !disabledPluginNames.includes(pluginName),
+  );
+
+  console.log('MonitoringPage > dynamicPluginNames: ', dynamicPluginNames);
+
+  let monitoringPluginEnabled = false;
+  dynamicPluginNames.forEach((plugin) => {
+    if (plugin === 'monitoring-plugin') {
+      monitoringPluginEnabled = true;
+    }
+  });
+  return monitoringPluginEnabled;
+};
+
 const handleNamespaceChange = (newNamespace: string): void => {
   if (newNamespace === ALL_NAMESPACES_KEY) {
     history.push(MONITORING_ALL_NS_PAGE_URI);
@@ -26,6 +57,9 @@ const handleNamespaceChange = (newNamespace: string): void => {
 };
 
 export const PageContents: React.FC = () => {
+  // test
+  console.log('MonitoringPage > isMonitoringPluginEnabled: ', isMonitoringPluginEnabled);
+
   const params = useParams();
   const { t } = useTranslation();
   const activeNamespace = params.ns;
@@ -36,12 +70,12 @@ export const PageContents: React.FC = () => {
     namespace: activeNamespace,
   });
   const pages = [
-    {
-      href: '',
-      // t('devconsole~Dashboards')
-      nameKey: 'devconsole~Dashboards',
-      component: MonitoringDashboardsPage,
-    },
+    // {
+    //   href: '',
+    //   // t('devconsole~Dashboards')
+    //   nameKey: 'devconsole~Dashboards',
+    //   component: MonitoringDashboardsPage,
+    // },
     {
       href: 'metrics',
       // t('devconsole~Metrics')
