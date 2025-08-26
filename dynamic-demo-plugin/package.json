@@ -73,8 +73,8 @@
       "sampleErrorBoundaryPage": "./components/ErrorBoundary/SampleErrorBoundaryPage",
       "createProjectModal": "./components/Modals/CreateProjectModal"
     },
-    "disableStaticPlugins": [
-      "@console/demo-plugin"
-    ]
+    "dependencies": {
+      "@console/pluginAPI": "*"
+    }
   }
 }
